@@ -46,7 +46,7 @@ app.all('/', function (req, res) {
     var twiml = new twilio.TwimlResponse();
     //Create TwiML response
     twiml.gather('/');
-    twiml.say("Thanks for Thanks for callin Coach ky ear. I will try to get him on the line. When he answers, you will be charged 1 dollar per minute for the duration of the conversation");
+    twiml.say("Thanks for callin Coach ka year. I will try to get him on the line. When he answers, you will be charged 1 dollar per minute for the duration of the conversation");
 
     twiml.say("Please enter your debit card number followed by the hash key.");
     twiml.gather({action: "/set-card-number", method: "GET", timeout: 30, }); 

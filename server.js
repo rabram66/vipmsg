@@ -94,7 +94,7 @@ app.all('/set-expiry', function (req, res) {
     twiml.say("You entered");
     twiml.say(digitize(expiry));
     twiml.say("Thanks");
-    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+    MongoClient.connect("mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65", function(err, db) {
      if(err) { return console.dir(err); }
 
     var collection = db.collection('cards');
@@ -121,7 +121,7 @@ app.all('/set-cvv', function (req, res) {
     twiml.say("You entered");
     twiml.say(digitize(cvv));
     twiml.say("Nice security code.");
-    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+    MongoClient.connect("mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65", function(err, db) {
      if(err) { return console.dir(err); }
 
     var collection = db.collection('cards');

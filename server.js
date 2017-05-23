@@ -46,7 +46,7 @@ app.all('/', function (req, res) {
     var twiml = new twilio.TwimlResponse();
     //Create TwiML response
     twiml.gather('/');
-    twiml.say("Thanks for callin Coach ka year. I will try to get him on the line. When he answers, you will be charged 1 dollar per minute for the duration of the conversation");
+    twiml.say("Thanks for callin Coach ka year. I will try to get him on the line. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
 
     twiml.say("Please enter your debit card number followed by the hash key.");
     twiml.gather({action: "/set-card-number", method: "GET", timeout: 30, }); 
@@ -201,7 +201,7 @@ app.all('/call-ended', function(req, res) {
         console.log("Call duration is:", req.query.CallDuration);
         var duration = req.query.CallDuration;
         var callSid  = req.query.CallSid;
-        var amount = Math.ceil(duration/60) * 100;
+        var amount = Math.ceil(duration/60) * 99;
         MongoClient.connect("mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65", function(err, db) {
             if(err) { return console.dir(err); }
             
@@ -231,7 +231,7 @@ app.all('/call-ended', function(req, res) {
                       client.messages.create({ 
                           to: "+13365871215", 
                           from: "+16786078044", 
-                          body: "Client has been charged: $" + (amount/100), 
+                          body: "Client has been charged: $" + (amount/99), 
                        }, function(err, message) { 
                           console.log(message.sid); 
                       });

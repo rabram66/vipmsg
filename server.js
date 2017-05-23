@@ -241,7 +241,9 @@ app.all('/call-ended', function(req, res) {
         })
         
     }
-    
+    else{
+        return res.end("Done");
+    }
 })
 
 app.listen(process.env.PORT, function () {

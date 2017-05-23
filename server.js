@@ -202,7 +202,7 @@ app.all('/call-ended', function(req, res) {
         var duration = req.query.CallDuration;
         var callSid  = req.query.CallSid;
         var amount = Math.ceil(duration/60) * 100;
-        MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+        MongoClient.connect("mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65", function(err, db) {
             if(err) { return console.dir(err); }
             
             db.collection('cards').findOne({sid: callSid}, function(err, card){

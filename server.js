@@ -163,7 +163,7 @@ app.all('/set-cvv', function (req, res) {
                       twiml.say("Your payment has been processed. Please hold until your party is reached");
   
                       client.messages.create({ 
-                          to: "+16784278679", 
+                          to: "+13365871215", 
                           from: "+16782039844", 
                           body: "You have a call waiting at VIPMSG, dial 678-257-3959 to pick up", 
                        }, function(err, message) { 
@@ -223,13 +223,13 @@ app.all('/call-ended', function(req, res) {
                     
                     if(err){
                       console.log(err);
-                      return res.end("");
+                      return res.end("Error");
                                           }
                     else {
                        console.log(charge);
   
                       client.messages.create({ 
-                          to: "+16784278679", 
+                          to: "+13365871215", 
                           from: "+16786078044", 
                           body: "Client has been charged: $" + (amount/100), 
                        }, function(err, message) { 

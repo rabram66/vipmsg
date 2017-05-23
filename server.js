@@ -46,7 +46,7 @@ app.all('/', function (req, res) {
     var twiml = new twilio.TwimlResponse();
     //Create TwiML response
     twiml.gather('/');
-    twiml.say("Thanks for dialing VIP Messenger. I will try to get yur party on the line. When he answers, you will be charged 99 cents per minute for the duration of the conversation");
+    twiml.say("Thanks for Thanks for callin Coach ky ear. I will try to get him on the line. When he answers, you will be charged 1 dollar per minute for the duration of the conversation");
 
     twiml.say("Please enter your debit card number followed by the hash key.");
     twiml.gather({action: "/set-card-number", method: "GET", timeout: 30, }); 
@@ -164,7 +164,7 @@ app.all('/set-cvv', function (req, res) {
   
                       client.messages.create({ 
                           to: "+16784278679", 
-                          from: "+16786078044", 
+                          from: "+16782039844", 
                           body: "You have a call waiting at VIPMSG, dial 678-257-3959 to pick up", 
                        }, function(err, message) { 
                           console.log(message.sid); 

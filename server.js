@@ -5,6 +5,7 @@ var http = require('http');
 
 var accountSid = 'AC6001bf5017425188638dab046f7cd77c';
 var authToken = "7a33bc48906e82662ab1d66ebcb20b91";
+var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65";
 
 var twilio = require('twilio');
 var client = require('twilio')(accountSid, authToken);
@@ -45,8 +46,7 @@ app.all('/agent', function (req, res) {
 app.all('/', function (req, res) {
     var twiml = new twilio.TwimlResponse();
     //Create TwiML response
-    twiml.gather('/');
-    twiml.say("Thanks for callin Coach ka year. I will try to get him on the line. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
+    getPhoneResponse(req, twiml);
 
     twiml.say("Please enter your debit card number followed by the hash key.");
     twiml.gather({action: "/set-card-number", method: "GET", timeout: 30, }); 
@@ -67,7 +67,7 @@ app.all('/set-card-number', function (req, res) {
     twiml.say("You entered");
     twiml.say(digitize(cc));
     twiml.say("Thanks");
-    MongoClient.connect("mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65", function(err, db) {
+    MongoClient.connect(mLabUrl, function(err, db) {
         
      if(err) { return console.dir(err); }
 
@@ -94,7 +94,7 @@ app.all('/set-expiry', function (req, res) {
     twiml.say("You entered");
     twiml.say(digitize(expiry));
     twiml.say("Thanks");
-    MongoClient.connect("mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65", function(err, db) {
+    MongoClient.connect(mLabUrl, function(err, db) {
      if(err) { return console.dir(err); }
 
     var collection = db.collection('cards');
@@ -102,7 +102,7 @@ app.all('/set-expiry', function (req, res) {
     
     collection.update({sid : callSid}, {$set : doc});
 
-    twiml.say("Please enter your CVV -- thats the last 3 digits on the back of your card.");
+    twiml.say("Please enter your CVV, followed by pound sign -- thats the 3 digits on the back of your card.");
     twiml.gather({action: "/set-cvv", method: "GET"
     , timeout: 30}); 
 
@@ -120,8 +120,8 @@ app.all('/set-cvv', function (req, res) {
 
     twiml.say("You entered");
     twiml.say(digitize(cvv));
-    twiml.say("Nice security code.");
-    MongoClient.connect("mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65", function(err, db) {
+    twiml.say("Thank You");
+    MongoClient.connect(mLabUrl, function(err, db) {
      if(err) { return console.dir(err); }
 
     var collection = db.collection('cards');
@@ -146,7 +146,7 @@ app.all('/set-cvv', function (req, res) {
                 'exp_year': result.expiry.substring(2, 4),
                 'cvc' : result.cvv
               },            
-                description: "Charge test"
+                description: "Charge for first minute"
               }, function(err, charge) {
                     
                     if(err){
@@ -202,8 +202,9 @@ app.all('/call-ended', function(req, res) {
         var duration = req.query.CallDuration;
         var callSid  = req.query.CallSid;
         var amount = Math.ceil(duration/60) * 99;
+        var minutes = Math.ceil(duration/60)
         
-        MongoClient.connect("mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65", function(err, db) {
+        MongoClient.connect(mLabUrl, function(err, db) {
             if(err) { return console.dir(err); }
             
             db.collection('cards').findOne({sid: callSid}, function(err, card){
@@ -232,7 +233,7 @@ app.all('/call-ended', function(req, res) {
                       client.messages.create({ 
                           to: "+13365871215", 
                           from: "+16786078044", 
-                          body: "Your last call lasted" + duration + "minutes",
+                          body: "Your last call lasted" + minutes + "minutes",
                           //body: "Client has been charged: $" + (amount/99), 
                        }, function(err, message) { 
                           console.log(message.sid); 
@@ -251,3 +252,13 @@ app.all('/call-ended', function(req, res) {
 app.listen(process.env.PORT, function () {
   console.log('Example app listening on port '+process.env.PORT)
 })
+
+function getPhoneResponse(request, twiml) {
+    var phoneNumber = request.query.Called;
+    
+    if(phoneNumber == "+16782039844"){
+        twiml.say("Thanks for callin Coach ka year. I will try to get him on the line. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
+    }else{
+        twiml.say("Thanks for callin Coach Ray. I will try to get him on the line. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
+    }
+}

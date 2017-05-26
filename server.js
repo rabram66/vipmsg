@@ -293,7 +293,7 @@ app.listen(process.env.PORT, function() {
 
 function getPhoneResponse(request, twiml) {
     var phoneNumber = request.query.Called;
-    var fromNumber = request.query.call.from
+    var fromNumber = request.query.Caller;
 
 
     if (phoneNumber == "+16782039844") {

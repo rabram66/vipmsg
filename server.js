@@ -292,7 +292,7 @@ function agentDequeue(request, twiml) {
     }else{
         dequeueName = "onhold-+16782039844";
     }
-    
+    console.log("Agent calling with ", phoneNumber, " is about to join queue:", dequeueName)
     twiml.dial({}, function() {
         this.queue(dequeueName);
     })

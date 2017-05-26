@@ -293,12 +293,16 @@ app.listen(process.env.PORT, function() {
 
 function getPhoneResponse(request, twiml) {
     var phoneNumber = request.query.Called;
+    var fromNumber = request.query.call.from
+
 
     if (phoneNumber == "+16782039844") {
         twiml.say("Thanks for callin Coach ka year. I will try to get him on the line. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
+         console.log(fromNumber);
     }
     else {
         twiml.say("Thanks for callin Coach Ray. This is a demo. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
+        console.log(fromNumber);
     }
 }
 

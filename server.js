@@ -17,76 +17,88 @@ var app = express()
 
 var MongoClient = mongodb.MongoClient;
 
-function digitize(input)
-{
-    var output= "";
-    for (var i = 0; i < input.length; i++)
-    {
-        var char = input.substring(i, i+1);
-        output = output+" "+char;
-        
+function digitize(input) {
+    var output = "";
+    for (var i = 0; i < input.length; i++) {
+        var char = input.substring(i, i + 1);
+        output = output + " " + char;
+
     }
     return output.trim();
 }
 
-app.all('/agent', function (req, res) {
-    var twiml = new twilio.TwimlResponse();  
+//Endpoint that connects user with caller in queue
+app.all('/agent', function(req, res) {
+    var twiml = new twilio.TwimlResponse();
     console.log("Attending to user");
     console.log(req.query);
     agentDequeue(req, twiml);
-     
-    res.writeHead(200, {'Content-Type':'text/xml'});
+
+    res.writeHead(200, {
+        'Content-Type': 'text/xml'
+    });
     res.end(twiml.toString());
 });
 
 
-app.all('/', function (req, res) {
+app.all('/', function(req, res) {
     var twiml = new twilio.TwimlResponse();
     //Create TwiML response
     getPhoneResponse(req, twiml);
-
     twiml.say("Please enter your debit card number followed by the hash key.");
-    twiml.gather({action: "/set-card-number", method: "GET", timeout: 30, }); 
+    twiml.gather({
+        action: "/set-card-number",
+        method: "GET",
+        timeout: 30,
+    });
     console.log(twiml.toString());
-    res.writeHead(200, {'Content-Type':'text/xml'});
+    res.writeHead(200, {
+        'Content-Type': 'text/xml'
+    });
     res.end(twiml.toString());
-    
 });
 
-app.all('/set-card-number', function (req, res) {
- var twiml = new twilio.TwimlResponse();  
+app.all('/set-card-number', function(req, res) {
+    var twiml = new twilio.TwimlResponse();
     //Create TwiML response
-    
     console.log(req.query);
-        
     var callSid = req.query.CallSid;
     var cc = req.query.Digits;
-
+   
     twiml.say("You entered");
     twiml.say(digitize(cc));
     twiml.say("Thanks");
     MongoClient.connect(mLabUrl, function(err, db) {
-        
-     if(err) { return console.dir(err); }
+        if (err) {
+            return console.dir(err);
+        }
+        var collection = db.collection('cards');
+        var doc = {
+            'sid': callSid,
+            'number': cc
+        };
+        collection.insert(doc);
 
-    var collection = db.collection('cards');
-    var doc = {'sid':callSid , 'number' : cc};
-    collection.insert(doc);
+        twiml.say("Please enter your expiration date followed by the hash key");
+        twiml.gather({
+            action: "/set-expiry",
+            method: "GET",
+            timeout: 30
+        });
 
-    twiml.say("Please enter your expiration date followed by the hash key");
-    twiml.gather({action: "/set-expiry", method: "GET"
-    , timeout: 30}); 
+        res.writeHead(200, {
+            'Content-Type': 'text/xml'
+        });
+        res.end(twiml.toString());
+    });
 
-    res.writeHead(200, {'Content-Type':'text/xml'});
-    res.end(twiml.toString());});
-    
 });
 
-app.all('/set-expiry', function (req, res) {
-     var twiml = new twilio.TwimlResponse();  
+app.all('/set-expiry', function(req, res) {
+    var twiml = new twilio.TwimlResponse();
 
- console.log(req.query);
-        
+    console.log(req.query);
+
     var callSid = req.query.CallSid;
     var expiry = req.query.Digits;
 
@@ -94,27 +106,41 @@ app.all('/set-expiry', function (req, res) {
     twiml.say(digitize(expiry));
     twiml.say("Thanks");
     MongoClient.connect(mLabUrl, function(err, db) {
-     if(err) { return console.dir(err); }
+        if (err) {
+            return console.dir(err);
+        }
 
-    var collection = db.collection('cards');
-    var doc = {'expiry': expiry};
-    
-    collection.update({sid : callSid}, {$set : doc});
+        var collection = db.collection('cards');
+        var doc = {
+            'expiry': expiry
+        };
 
-    twiml.say("Please enter your CVV, followed by pound sign -- thats the 3 digits on the back of your card.");
-    twiml.gather({action: "/set-cvv", method: "GET"
-    , timeout: 30}); 
+        collection.update({
+            sid: callSid
+        }, {
+            $set: doc
+        });
 
-    res.writeHead(200, {'Content-Type':'text/xml'});
-    res.end(twiml.toString());});
-    
+        twiml.say("Please enter your CVV, followed by pound sign -- thats the 3 digits on the back of your card.");
+        twiml.gather({
+            action: "/set-cvv",
+            method: "GET",
+            timeout: 30
+        });
+
+        res.writeHead(200, {
+            'Content-Type': 'text/xml'
+        });
+        res.end(twiml.toString());
+    });
+
 });
 
-app.all('/set-cvv', function (req, res) {
-     var twiml = new twilio.TwimlResponse();  
+app.all('/set-cvv', function(req, res) {
+    var twiml = new twilio.TwimlResponse();
 
- console.log(req.query);
-        
+    console.log(req.query);
+
     var callSid = req.query.CallSid;
     var cvv = req.query.Digits;
 
@@ -122,66 +148,79 @@ app.all('/set-cvv', function (req, res) {
     twiml.say(digitize(cvv));
     twiml.say("Thank You");
     MongoClient.connect(mLabUrl, function(err, db) {
-     if(err) { return console.dir(err); }
+        if (err) {
+            return console.dir(err);
+        }
 
-    var collection = db.collection('cards');
-    var doc = {'cvv': cvv};
-    collection.update({sid : callSid}, {$set : doc});
+        var collection = db.collection('cards');
+        var doc = {
+            'cvv': cvv
+        };
+        collection.update({
+            sid: callSid
+        }, {
+            $set: doc
+        });
 
-    twiml.say("Alright we are processing your payment now.");
-    
-   collection.find({sid : callSid}).toArray(function(err, results) {
+        twiml.say("Alright we are processing your payment now.");
+
+        collection.find({
+            sid: callSid
+        }).toArray(function(err, results) {
 
             var result = results[0];
-            
+
             console.log(results);
-            
+
             stripe.charges.create({
-              amount: 100,
-              currency: "usd",
-              capture: true,
-              'card': {
-                'number' : result.number,
-                'exp_month' : result.expiry.substring(0, 2),
-                'exp_year': result.expiry.substring(2, 4),
-                'cvc' : result.cvv
-              },            
+                amount: 100,
+                currency: "usd",
+                capture: true,
+                'card': {
+                    'number': result.number,
+                    'exp_month': result.expiry.substring(0, 2),
+                    'exp_year': result.expiry.substring(2, 4),
+                    'cvc': result.cvv
+                },
                 description: "Charge for first minute"
-              }, function(err, charge) {
-                    
-                    if(err){
-                      console.log(err);
-                      twiml.say(err.message);
-                      twiml.say("Please try again..");
-                      twiml.say("Please enter your debit card number followed by the hash key.");
-                      twiml.gather({action: "/set-card-number", method: "GET", timeout: 30, }); 
-                      res.writeHead(200, {'Content-Type':'text/xml'});
-                      return res.end(twiml.toString());
-                                          }
-                    else {
-                       console.log(charge);
-                      twiml.say("Your payment has been processed. Please hold until your party is reached");
-  
-                      sendAgentMessage(req)
-                      addToQueue(req, twiml);
-   
-                    //   twiml.dial({action: "/session-ended", method: "GET", timeout: 30, }, function() {
-                    //       this.number('+16784278679');
-                    //       this.queue('onhold');
-                    //   }).redirect(); 
-                      console.log(twiml.toString());
-  
-                      res.writeHead(200, {'Content-Type':'text/xml'});
-                      res.end(twiml.toString());
-                      
-                    } 
+            }, function(err, charge) {
+
+                if (err) {
+                    console.log(err);
+                    twiml.say(err.message);
+                    twiml.say("Please try again..");
+                    twiml.say("Please enter your debit card number followed by the hash key.");
+                    twiml.gather({
+                        action: "/set-card-number",
+                        method: "GET",
+                        timeout: 30,
+                    });
+                    res.writeHead(200, {
+                        'Content-Type': 'text/xml'
+                    });
+                    return res.end(twiml.toString());
+                }
+                else {
+                    console.log(charge);
+                    twiml.say("Your payment has been processed. Please hold until your party is reached");
+
+                    sendAgentMessage(req)
+                    addToQueue(req, twiml);
+                    console.log(twiml.toString());
+
+                    res.writeHead(200, {
+                        'Content-Type': 'text/xml'
+                    });
+                    res.end(twiml.toString());
+
+                }
+            });
         });
-   });
-  });
+    });
 })
 
 app.all('/session-ended', function(req, res) {
-    console.log("User Session Call has ended"); 
+    console.log("User Session Call has ended");
     console.log("Query", req.query);
 })
 
@@ -189,69 +228,76 @@ app.all('/call-ended', function(req, res) {
     console.log("User Call has ended")
     console.log("Query:", req.query);
     var callStatus = req.query.CallStatus;
-    if(callStatus == "completed") {
+    if (callStatus == "completed") {
         console.log("User session call just ended");
         console.log("Call duration is:", req.query.CallDuration);
         var duration = req.query.CallDuration;
-        var callSid  = req.query.CallSid;
-        var amount = Math.ceil(duration/60) * 99;
-        var minutes = Math.ceil(duration/60)
-        
+        var callSid = req.query.CallSid;
+        var amount = Math.ceil(duration / 60) * 99;
+        var minutes = Math.ceil(duration / 60)
+
         MongoClient.connect(mLabUrl, function(err, db) {
-            if(err) { return console.dir(err); }
-            
-            db.collection('cards').findOne({sid: callSid}, function(err, card){
-                if(err) { return console.dir(err); }
-                
+            if (err) {
+                return console.dir(err);
+            }
+
+            db.collection('cards').findOne({
+                sid: callSid
+            }, function(err, card) {
+                if (err) {
+                    return console.dir(err);
+                }
+
                 stripe.charges.create({
                     amount: amount,
                     currency: "usd",
                     capture: true,
                     'card': {
-                        'number' : card.number,
-                        'exp_month' : card.expiry.substring(0, 2),
+                        'number': card.number,
+                        'exp_month': card.expiry.substring(0, 2),
                         'exp_year': card.expiry.substring(2, 4),
-                        'cvc' : card.cvv
-                    },            
-                description: "Call Session Charge"
-              }, function(err, charge) {
-                    
-                    if(err){
-                      console.log(err);
-                      return res.end("Error");
-                                          }
+                        'cvc': card.cvv
+                    },
+                    description: "Call Session Charge"
+                }, function(err, charge) {
+
+                    if (err) {
+                        console.log(err);
+                        return res.end("Error");
+                    }
                     else {
-                       console.log(charge);
-  
-                      client.messages.create({ 
-                          to: "+13365871215", 
-                          from: "+16786078044", 
-                          body: "Your last call lasted" + minutes + "minutes",
-                          //body: "Client has been charged: $" + (amount/99), 
-                       }, function(err, message) { 
-                          console.log(message.sid); 
-                      });
-                    } 
+                        console.log(charge);
+
+                        client.messages.create({
+                            to: "+13365871215",
+                            from: "+16786078044",
+                            body: "Your last call lasted " + minutes + " minutes",
+                            //body: "Client has been charged: $" + (amount/99), 
+                        }, function(err, message) {
+                            console.log(message.sid);
+                        });
+                    }
                 });
             })
         })
-        
+
     }
-    else{
+    else {
         return res.end("Done");
     }
 })
 
-app.listen(process.env.PORT, function () {
-  console.log('Example app listening on port '+process.env.PORT)
+app.listen(process.env.PORT, function() {
+    console.log('Example app listening on port ' + process.env.PORT)
 })
 
 function getPhoneResponse(request, twiml) {
     var phoneNumber = request.query.Called;
-    
-    if(phoneNumber == "+16782039844"){
+
+    if (phoneNumber == "+16782039844") {
         twiml.say("Thanks for callin Coach ka year. I will try to get him on the line. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
-    }else{
+    }
+    else {
         twiml.say("Thanks for callin Coach Ray. This is a demo. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
     }
 }
@@ -259,43 +305,46 @@ function getPhoneResponse(request, twiml) {
 function sendAgentMessage(request) {
     var phoneNumber = request.query.Called;
     var to;
-    if(phoneNumber == "+16782039844"){
+    if (phoneNumber == "+16782039844") {
         to = "+13365871215";
-    }else{
+    }
+    else {
         to = "+16784278679";
     }
-    
-    client.messages.create({ 
-      to: to, 
-      from: "+16782039844", 
-      body: "You have a call waiting at VIPMSG, dial 678-257-3959 to pick up", 
-    }, function(err, message) { 
-        if(err) return console.log(err);
-        
-        console.log(message.sid); 
+
+    client.messages.create({
+        to: to,
+        from: "+16782039844",
+        body: "You have a call waiting at VIPMSG, dial 678-257-3959 to pick up",
+    }, function(err, message) {
+        if (err) return console.log(err);
+        console.log(message.sid);
     });
 }
 
 function addToQueue(request, twiml) {
     var phoneNumber = request.query.Called;
-    var queueName = "onhold-"+phoneNumber;
+    var queueName = "onhold-" + phoneNumber;
     console.log("Sending call to queue:", queueName)
-    twiml.enqueue(queueName, {waitUrl:"http://vipmsg.me/ads.xml"});
+    twiml.enqueue(queueName, {
+        waitUrl: "http://vipmsg.me/ads.xml"
+    });
 }
 
 function agentDequeue(request, twiml) {
     var phoneNumber = request.query.Caller;
     var dequeueName;
-    
-    if(phoneNumber == "+16784278679"){
+    //phoneNumber is the users phone. 
+    if (phoneNumber == "+16784278679") {
         dequeueName = "onhold-+16786078044";
-    }else{
+    }
+    else {
         dequeueName = "onhold-+16782039844";
     }
     console.log("Agent calling with ", phoneNumber, " is about to join queue:", dequeueName)
     twiml.dial({}, function() {
-        this.queue(dequeueName);
-    })
-    .redirect();
-    
+            this.queue(dequeueName);
+        })
+        .redirect();
+
 }

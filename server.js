@@ -238,14 +238,16 @@ app.all('/call-ended', function(req, res) {
 
         MongoClient.connect(mLabUrl, function(err, db) {
             if (err) {
-                return console.dir(err);
+                console.dir(err);
+                return res.end("Error");
             }
 
             db.collection('cards').findOne({
                 sid: callSid
             }, function(err, card) {
-                if (err) {
-                    return console.dir(err);
+                if (err || card === null) {
+                    console.dir(err);
+                    return res.end("Error");
                 }
 
                 stripe.charges.create({
@@ -275,6 +277,7 @@ app.all('/call-ended', function(req, res) {
                             //body: "Client has been charged: $" + (amount/99), 
                         }, function(err, message) {
                             console.log(message.sid);
+                            res.end("Done");
                         });
                     }
                 });

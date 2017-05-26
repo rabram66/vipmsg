@@ -293,21 +293,22 @@ app.listen(process.env.PORT, function() {
 
 function getPhoneResponse(request, twiml) {
     var phoneNumber = request.query.Called;
-    var fromNumber = request.query.Caller;
+    
 
 
     if (phoneNumber == "+16782039844") {
         twiml.say("Thanks for callin Coach ka year. I will try to get him on the line. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
-         console.log(fromNumber);
+         
     }
     else {
         twiml.say("Thanks for callin Coach Ray. This is a demo. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
-        console.log(fromNumber);
+       
     }
 }
 
 function sendAgentMessage(request) {
     var phoneNumber = request.query.Called;
+    var fromNumber = request.query.Caller;
     var to;
     if (phoneNumber == "+16782039844") {
         to = "+13365871215";
@@ -319,7 +320,7 @@ function sendAgentMessage(request) {
     client.messages.create({
         to: to,
         from: "+16782039844",
-        body: "You have a call waiting at VIPMSG, dial 678-257-3959 to pick up",
+        body: "You have a call from "+fromNumber+" waiting at VIPMSG, dial 678-257-3959 to pick up.",
     }, function(err, message) {
         if (err) return console.log(err);
         console.log(message.sid);

@@ -30,13 +30,10 @@ function digitize(input)
 }
 
 app.all('/agent', function (req, res) {
-     var twiml = new twilio.TwimlResponse();  
-     console.log("Attending to user");
-     console.log(req.query);
-     twiml.dial({}, function() {
-        this.queue('onhold');
-     })
-    .redirect();
+    var twiml = new twilio.TwimlResponse();  
+    console.log("Attending to user");
+    console.log(req.query);
+    agentDequeue(req, twiml);
      
     res.writeHead(200, {'Content-Type':'text/xml'});
     res.end(twiml.toString());
@@ -55,6 +52,7 @@ app.all('/', function (req, res) {
     res.end(twiml.toString());
     
 });
+
 app.all('/set-card-number', function (req, res) {
  var twiml = new twilio.TwimlResponse();  
     //Create TwiML response
@@ -83,6 +81,7 @@ app.all('/set-card-number', function (req, res) {
     res.end(twiml.toString());});
     
 });
+
 app.all('/set-expiry', function (req, res) {
      var twiml = new twilio.TwimlResponse();  
 
@@ -110,6 +109,7 @@ app.all('/set-expiry', function (req, res) {
     res.end(twiml.toString());});
     
 });
+
 app.all('/set-cvv', function (req, res) {
      var twiml = new twilio.TwimlResponse();  
 
@@ -162,15 +162,8 @@ app.all('/set-cvv', function (req, res) {
                        console.log(charge);
                       twiml.say("Your payment has been processed. Please hold until your party is reached");
   
-                      client.messages.create({ 
-                          to: "+13365871215", 
-                          from: "+16782039844", 
-                          body: "You have a call waiting at VIPMSG, dial 678-257-3959 to pick up", 
-                       }, function(err, message) { 
-                          console.log(message.sid); 
-                      });
-   
-                      twiml.enqueue("onhold", {waitUrl:"http://vipmsg.me/ads.xml"});
+                      sendAgentMessage(req)
+                      addToQueue(req, twiml);
    
                     //   twiml.dial({action: "/session-ended", method: "GET", timeout: 30, }, function() {
                     //       this.number('+16784278679');
@@ -259,6 +252,50 @@ function getPhoneResponse(request, twiml) {
     if(phoneNumber == "+16782039844"){
         twiml.say("Thanks for callin Coach ka year. I will try to get him on the line. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
     }else{
-        twiml.say("Thanks for callin Coach Ray. I will try to get him on the line. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
+        twiml.say("Thanks for callin Coach Ray. This is a demo. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
     }
+}
+
+function sendAgentMessage(request) {
+    var phoneNumber = request.query.Called;
+    var to;
+    if(phoneNumber == "+16782039844"){
+        to = "+13365871215";
+    }else{
+        to = "+13365871215";
+    }
+    
+    client.messages.create({ 
+      to: to, 
+      from: "+16782039844", 
+      body: "You have a call waiting at VIPMSG, dial 678-257-3959 to pick up", 
+    }, function(err, message) { 
+        if(err) return console.log(err);
+        
+        console.log(message.sid); 
+    });
+}
+
+function addToQueue(request, twiml) {
+    var phoneNumber = request.query.Called;
+    var queueName = "onhold-"+phoneNumber;
+    console.log("Sending call to queue:", queueName)
+    twiml.enqueue(queueName, {waitUrl:"http://vipmsg.me/ads.xml"});
+}
+
+function agentDequeue(request, twiml) {
+    var phoneNumber = request.query.Caller;
+    var dequeueName;
+    
+    if(phoneNumber == "+16784278679"){
+        dequeueName = "onhold-+16786078044";
+    }else{
+        dequeueName = "onhold-+16782039844";
+    }
+    
+    twiml.dial({}, function() {
+        this.queue(dequeueName);
+    })
+    .redirect();
+    
 }

@@ -262,7 +262,7 @@ function sendAgentMessage(request) {
     if(phoneNumber == "+16782039844"){
         to = "+13365871215";
     }else{
-        to = "+13365871215";
+        to = "+16784278679";
     }
     
     client.messages.create({ 

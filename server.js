@@ -224,24 +224,57 @@ app.all('/session-ended', function(req, res) {
     console.log("Query", req.query);
 })
 
+app.all('/leaving-queue', function(req, res) {
+    console.log("Query", req.query);
+    
+    var twiml = new twilio.TwimlResponse();
+    var callSid = req.query.CallSid;
+    var timeSpent = req.query.QueueTime;
+    console.log("Caller: ", callSid, " spent ", timeSpent, " in the queue, leaving");
+    
+    MongoClient.connect(mLabUrl, function(err, db) {
+        if(err) {
+            twiml.say("Issue encountered");
+            res.writeHead(200, {
+                'Content-Type': 'text/xml'
+            });
+            return res.end(twiml.toString());
+        }
+        
+        var doc = {
+            callSid: callSid,
+            queueTime: timeSpent
+        }
+        db.collection('calls').insert(doc);
+        
+        twiml.say("You are about to be connected with the coach.");
+        res.writeHead(200, {
+            'Content-Type': 'text/xml'
+        });
+        return res.end(twiml.toString());
+    })
+})
+
 app.all('/call-ended', function(req, res) {
     console.log("User Call has ended")
     console.log("Query:", req.query);
     var callStatus = req.query.CallStatus;
     if (callStatus == "completed") {
         console.log("User session call just ended");
-        console.log("Call duration is:", req.query.CallDuration);
+        console.log("Total Call duration is:", req.query.CallDuration);
         var duration = req.query.CallDuration;
         var callSid = req.query.CallSid;
-        var amount = Math.ceil(duration / 60) * 99;
-        var minutes = Math.ceil(duration / 60)
 
         MongoClient.connect(mLabUrl, function(err, db) {
             if (err) {
                 console.dir(err);
                 return res.end("Error");
             }
-
+            db.collection('calls').findOne({
+                callSid: callSid
+            }, function(err, call){
+                if(err) return res.end("")
+            })
             db.collection('cards').findOne({
                 sid: callSid
             }, function(err, card) {
@@ -249,7 +282,10 @@ app.all('/call-ended', function(req, res) {
                     console.dir(err);
                     return res.end("Error");
                 }
-
+                var sessionDuration = duration - call.queueTime;
+                var amount = Math.ceil(sessionDuration / 60) * 99;
+                var minutes = Math.ceil(sessionDuration / 60);
+                console.log("Session Duration: ", sessionDuration);
                 stripe.charges.create({
                     amount: amount,
                     currency: "usd",
@@ -351,7 +387,10 @@ function agentDequeue(request, twiml) {
     }
     console.log("Agent calling with ", phoneNumber, " is about to join queue:", dequeueName)
     twiml.dial({}, function() {
-            this.queue(dequeueName);
+            this.queue(dequeueName, {
+                url: '/leaving-queue',
+                method: 'GET'
+            });
         })
         .redirect();
 

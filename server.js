@@ -275,6 +275,7 @@ app.all('/call-ended', function(req, res) {
             }, function(err, call){
                 if(err) return res.end("Error")
                 
+                console.log("call:", call);
                 db.collection('cards').findOne({
                 sid: callSid
                 }, function(err, card) {
@@ -282,7 +283,7 @@ app.all('/call-ended', function(req, res) {
                         console.dir(err);
                         return res.end("Error");
                     }
-                    var sessionDuration = duration - call.queueTime;
+                    var sessionDuration = (duration - call.queueTime) - 60;
                     var amount = Math.ceil(sessionDuration / 60) * 99;
                     var minutes = Math.ceil(sessionDuration / 60);
                     console.log("Session Duration: ", sessionDuration);

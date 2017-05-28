@@ -273,51 +273,53 @@ app.all('/call-ended', function(req, res) {
             db.collection('calls').findOne({
                 callSid: callSid
             }, function(err, call){
-                if(err) return res.end("")
-            })
-            db.collection('cards').findOne({
+                if(err) return res.end("Error")
+                
+                db.collection('cards').findOne({
                 sid: callSid
-            }, function(err, card) {
-                if (err || card === null) {
-                    console.dir(err);
-                    return res.end("Error");
-                }
-                var sessionDuration = duration - call.queueTime;
-                var amount = Math.ceil(sessionDuration / 60) * 99;
-                var minutes = Math.ceil(sessionDuration / 60);
-                console.log("Session Duration: ", sessionDuration);
-                stripe.charges.create({
-                    amount: amount,
-                    currency: "usd",
-                    capture: true,
-                    'card': {
-                        'number': card.number,
-                        'exp_month': card.expiry.substring(0, 2),
-                        'exp_year': card.expiry.substring(2, 4),
-                        'cvc': card.cvv
-                    },
-                    description: "Call Session Charge"
-                }, function(err, charge) {
-
-                    if (err) {
-                        console.log(err);
+                }, function(err, card) {
+                    if (err || card === null) {
+                        console.dir(err);
                         return res.end("Error");
                     }
-                    else {
-                        console.log(charge);
-
-                        client.messages.create({
-                            to: "+13365871215",
-                            from: "+16786078044",
-                            body: "Your last call lasted " + minutes + " minutes",
-                            //body: "Client has been charged: $" + (amount/99), 
-                        }, function(err, message) {
-                            console.log(message.sid);
-                            res.end("Done");
-                        });
-                    }
-                });
+                    var sessionDuration = duration - call.queueTime;
+                    var amount = Math.ceil(sessionDuration / 60) * 99;
+                    var minutes = Math.ceil(sessionDuration / 60);
+                    console.log("Session Duration: ", sessionDuration);
+                    stripe.charges.create({
+                        amount: amount,
+                        currency: "usd",
+                        capture: true,
+                        'card': {
+                            'number': card.number,
+                            'exp_month': card.expiry.substring(0, 2),
+                            'exp_year': card.expiry.substring(2, 4),
+                            'cvc': card.cvv
+                        },
+                        description: "Call Session Charge"
+                    }, function(err, charge) {
+    
+                        if (err) {
+                            console.log(err);
+                            return res.end("Error");
+                        }
+                        else {
+                            console.log(charge);
+    
+                            client.messages.create({
+                                to: "+13365871215",
+                                from: "+16786078044",
+                                body: "Your last call lasted " + minutes + " minutes",
+                                //body: "Client has been charged: $" + (amount/99), 
+                            }, function(err, message) {
+                                console.log(message.sid);
+                                res.end("Done");
+                            });
+                        }
+                    });
+                })
             })
+            
         })
 
     }
@@ -393,5 +395,4 @@ function agentDequeue(request, twiml) {
             });
         })
         .redirect();
-
 }

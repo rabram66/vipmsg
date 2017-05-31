@@ -308,7 +308,7 @@ app.all('/call-ended', function(req, res) {
                             console.log(charge);
     
                             client.messages.create({
-                                to: "+13365871215",
+                                to: "+16784278679",
                                 from: "+16786078044",
                                 body: "Your last call lasted " + minutes + " minutes",
                                 //body: "Client has been charged: $" + (amount/99), 

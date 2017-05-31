@@ -343,7 +343,7 @@ function getPhoneResponse(request, twiml) {
          
     }
     else {
-        twiml.say("Thanks for callin Coach Ray. This is a demo. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
+        twiml.say("Thanks for callin Stacey J. When she answers, you will be charged 99 Cents per minute for the duration of the conversation");
        
     }
 }
@@ -356,7 +356,7 @@ function sendAgentMessage(request) {
         to = "+13365871215";
     }
     else {
-        to = "+16784278679";
+        to = "+17735800444";
     }
 
     client.messages.create({
@@ -382,7 +382,7 @@ function agentDequeue(request, twiml) {
     var phoneNumber = request.query.Caller;
     var dequeueName;
     //phoneNumber is the users phone. 
-    if (phoneNumber == "+16784278679") {
+    if (phoneNumber == "+7735800444") {
         dequeueName = "onhold-+16786078044";
     }
     else {

@@ -343,7 +343,7 @@ function getPhoneResponse(request, twiml) {
          
     }
     else {
-        twiml.say("Thanks for callin Stacey J. When she answers, you will be charged 99 Cents per minute for the duration of the conversation");
+        twiml.say("Thanks for callin Stacey J,  When she answers, you will be charged 99 Cents per minute for the duration of the conversation");
        
     }
 }

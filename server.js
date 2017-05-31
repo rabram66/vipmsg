@@ -247,7 +247,7 @@ app.all('/leaving-queue', function(req, res) {
         }
         db.collection('calls').insert(doc);
         
-        twiml.say("You are about to be connected with the coach.");
+        twiml.say("You are about to be connected.");
         res.writeHead(200, {
             'Content-Type': 'text/xml'
         });
@@ -355,7 +355,7 @@ function sendAgentMessage(request) {
         to = "+13365871215";
     }
     else {
-        to = "+16784278679";
+        to = "+4044628524";
     }
 
     client.messages.create({
@@ -381,8 +381,8 @@ function agentDequeue(request, twiml) {
     var phoneNumber = request.query.Caller;
     var dequeueName;
     //phoneNumber is the users phone. 
-    if (phoneNumber == "+16784278679") {
-        dequeueName = "onhold-+16786078044";
+    if (phoneNumber == "+4044688524") {
+        dequeueName = "onhold-+13123135483";
     }
     else {
         dequeueName = "onhold-+16782039844";

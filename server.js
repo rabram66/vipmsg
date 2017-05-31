@@ -255,13 +255,44 @@ app.all('/leaving-queue', function(req, res) {
     })
 })
 
+app.all('/leaving-queue', function(req, res) {
+    console.log("Query", req.query);
+    
+    var twiml = new twilio.TwimlResponse();
+    var callSid = req.query.CallSid;
+    var timeSpent = req.query.QueueTime;
+    console.log("Caller: ", callSid, " spent ", timeSpent, " in the queue, leaving");
+    
+    MongoClient.connect(mLabUrl, function(err, db) {
+        if(err) {
+            twiml.say("Issue encountered");
+            res.writeHead(200, {
+                'Content-Type': 'text/xml'
+            });
+            return res.end(twiml.toString());
+        }
+        
+        var doc = {
+            callSid: callSid,
+            queueTime: timeSpent
+        }
+        db.collection('calls').insert(doc);
+        
+        twiml.say("You are about to be connected with the coach.");
+        res.writeHead(200, {
+            'Content-Type': 'text/xml'
+        });
+        return res.end(twiml.toString());
+    })
+})
+
 app.all('/call-ended', function(req, res) {
     console.log("User Call has ended")
     console.log("Query:", req.query);
     var callStatus = req.query.CallStatus;
     if (callStatus == "completed") {
         console.log("User session call just ended");
-        console.log("Total Call duration is:", req.query.CallDuration);
+        console.log("Total Total Call duration is:", req.query.CallDuration);
         var duration = req.query.CallDuration;
         var callSid = req.query.CallSid;
 
@@ -271,6 +302,10 @@ app.all('/call-ended', function(req, res) {
                 return res.end("Error");
             }
             db.collection('calls').findOne({
+                
+            }, function(err, call){
+                if(err) return res.end("")
+            })            db.collection('calls').findOne({
                 callSid: callSid
             }, function(err, call){
                 if(err) return res.end("Error")
@@ -343,7 +378,7 @@ function getPhoneResponse(request, twiml) {
          
     }
     else {
-        twiml.say("Thanks for callin Stacey J,  When she answers, you will be charged 99 Cents per minute for the duration of the conversation");
+        twiml.say("Thanks for callin Coach Ray. This is a demo. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
        
     }
 }
@@ -356,7 +391,7 @@ function sendAgentMessage(request) {
         to = "+13365871215";
     }
     else {
-        to = "+17735800444";
+        to = "+16784278679";
     }
 
     client.messages.create({
@@ -382,8 +417,8 @@ function agentDequeue(request, twiml) {
     var phoneNumber = request.query.Caller;
     var dequeueName;
     //phoneNumber is the users phone. 
-    if (phoneNumber == "+7735800444") {
-        dequeueName = "onhold-+13123135483";
+    if (phoneNumber == "+16784278679") {
+        dequeueName = "onhold-+16786078044";
     }
     else {
         dequeueName = "onhold-+16782039844";
@@ -391,6 +426,9 @@ function agentDequeue(request, twiml) {
     console.log("Agent calling with ", phoneNumber, " is about to join queue:", dequeueName)
     twiml.dial({}, function() {
             this.queue(dequeueName, {
+                url: '/leaving-queue',
+                method: 'GET'
+            }, {
                 url: '/leaving-queue',
                 method: 'GET'
             });

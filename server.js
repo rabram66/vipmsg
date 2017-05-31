@@ -255,44 +255,13 @@ app.all('/leaving-queue', function(req, res) {
     })
 })
 
-app.all('/leaving-queue', function(req, res) {
-    console.log("Query", req.query);
-    
-    var twiml = new twilio.TwimlResponse();
-    var callSid = req.query.CallSid;
-    var timeSpent = req.query.QueueTime;
-    console.log("Caller: ", callSid, " spent ", timeSpent, " in the queue, leaving");
-    
-    MongoClient.connect(mLabUrl, function(err, db) {
-        if(err) {
-            twiml.say("Issue encountered");
-            res.writeHead(200, {
-                'Content-Type': 'text/xml'
-            });
-            return res.end(twiml.toString());
-        }
-        
-        var doc = {
-            callSid: callSid,
-            queueTime: timeSpent
-        }
-        db.collection('calls').insert(doc);
-        
-        twiml.say("You are about to be connected with the coach.");
-        res.writeHead(200, {
-            'Content-Type': 'text/xml'
-        });
-        return res.end(twiml.toString());
-    })
-})
-
 app.all('/call-ended', function(req, res) {
     console.log("User Call has ended")
     console.log("Query:", req.query);
     var callStatus = req.query.CallStatus;
     if (callStatus == "completed") {
         console.log("User session call just ended");
-        console.log("Total Total Call duration is:", req.query.CallDuration);
+        console.log("Total Call duration is:", req.query.CallDuration);
         var duration = req.query.CallDuration;
         var callSid = req.query.CallSid;
 
@@ -301,27 +270,23 @@ app.all('/call-ended', function(req, res) {
                 console.dir(err);
                 return res.end("Error");
             }
+            
             db.collection('calls').findOne({
                 
             }, function(err, call){
-                if(err) return res.end("")
-            })            db.collection('calls').findOne({
-                callSid: callSid
-            }, function(err, call){
-                if(err) return res.end("Error")
+                if(err || call === null) return res.end("Issue retrieving call details");
                 
-                console.log("call:", call);
                 db.collection('cards').findOne({
-                sid: callSid
+                    sid: callSid
                 }, function(err, card) {
                     if (err || card === null) {
                         console.dir(err);
                         return res.end("Error");
                     }
-                    var sessionDuration = (duration - call.queueTime) - 60;
+                    
+                    var sessionDuration = duration - call.queueTime;
                     var amount = Math.ceil(sessionDuration / 60) * 99;
-                    var minutes = Math.ceil(sessionDuration / 60);
-                    console.log("Session Duration: ", sessionDuration);
+                    var minutes = Math.ceil(sessionDuration / 60)
                     stripe.charges.create({
                         amount: amount,
                         currency: "usd",
@@ -353,9 +318,8 @@ app.all('/call-ended', function(req, res) {
                             });
                         }
                     });
-                })
+                })  
             })
-            
         })
 
     }
@@ -428,10 +392,8 @@ function agentDequeue(request, twiml) {
             this.queue(dequeueName, {
                 url: '/leaving-queue',
                 method: 'GET'
-            }, {
-                url: '/leaving-queue',
-                method: 'GET'
             });
         })
         .redirect();
+
 }

@@ -79,10 +79,11 @@ app.all('/agent', function(req, res) {
 });
 
 
-app.all('/', function(req, res) {
+app.all('/start-call', function(req, res) {
     //Create TwiML response
     var twiml = new twilio.TwimlResponse();
     Coach.findOne({callLine: req.query.Called}).then((coach) => {
+        console.log("Coach:", coach);
         getPhoneResponse(req, twiml, coach);
         twiml.say("Please enter your debit card number followed by the hash key.");
         twiml.gather({

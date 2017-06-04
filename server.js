@@ -401,7 +401,7 @@ app.listen(process.env.PORT, function() {
 
 function getPhoneResponse(request, twiml, coach) {
     if(coach) return twiml.say(coach.textResponse);
-    else return twiml.say("Thanks for callin Stacey J. When she answers, you will be charged 99 Cents per minute for the duration of the conversation");
+    else return twiml.say("Thanks for callin Coach ka year When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
 }
 
 function sendAgentMessage(request, coach) {

@@ -80,20 +80,30 @@ app.all('/agent', function(req, res) {
 
 
 app.all('/', function(req, res) {
-    var twiml = new twilio.TwimlResponse();
     //Create TwiML response
-    getPhoneResponse(req, twiml);
-    twiml.say("Please enter your debit card number followed by the hash key.");
-    twiml.gather({
-        action: "/set-card-number",
-        method: "GET",
-        timeout: 30,
-    });
-    console.log(twiml.toString());
-    res.writeHead(200, {
-        'Content-Type': 'text/xml'
-    });
-    res.end(twiml.toString());
+    var twiml = new twilio.TwimlResponse();
+    Coach.findOne({callLine: req.query.Called}).then((coach) => {
+        getPhoneResponse(req, twiml, coach);
+        twiml.say("Please enter your debit card number followed by the hash key.");
+        twiml.gather({
+            action: "/set-card-number",
+            method: "GET",
+            timeout: 30,
+        });
+        console.log(twiml.toString());
+        res.writeHead(200, {
+            'Content-Type': 'text/xml'
+        });
+        res.end(twiml.toString());    
+    }).catch((error) => {
+        twiml.say("Please enter your debit card number followed by the hash key.");
+        console.log(twiml.toString());
+        res.writeHead(200, {
+            'Content-Type': 'text/xml'
+        });
+        res.end(twiml.toString());    
+    })
+    
 });
 
 app.all('/set-card-number', function(req, res) {

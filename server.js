@@ -16,8 +16,8 @@ mongoose.connect(mLabUrl);
 var twilio = require('twilio');
 var client = require('twilio')(accountSid, authToken);
 
-//var stripe = require('stripe')('sk_live_iWRrm7HN6sgf7P0tsQnmX5wO'); //Live aaccount
-var stripe = require('stripe')('sk_test_wSTkE9RipdMRufwEoG6vPPj4'); //test account
+var stripe = require('stripe')('sk_live_iWRrm7HN6sgf7P0tsQnmX5wO'); //Live aaccount
+//var stripe = require('stripe')('sk_test_wSTkE9RipdMRufwEoG6vPPj4'); //test account
 
 var express      = require('express');
 var app          = express();

@@ -1,0 +1,47 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css')
+    link(rel='stylesheet', href='/css/sb-admin.css')
+    link(rel='stylesheet', href='/css/style.css')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.js')
+    
+  body
+    nav.navbar.navbar-default.navbar-static-top(role='navigation',style='margin-bottom:0')
+    
+      div.navbar-header
+        button.navbar-toggle(type='button',data-toggle='collapse')
+        a.navbar-brand(href='#') Vip Msg
+      if !login
+        .navbar-default.sidebar(role='navigation')
+          .sidebar-nav.navbar-collapse
+            ul#side-menu.nav.in
+              li.sidebar-search
+                form(action='/coaches/search',method='post')
+                  .input-group.custom-search-form
+                    input.form-control(type="text",placeholder="Search Coaches",name='query')
+                    span.input-group-btn
+              li
+                a(href="/admin/dashboard") Home
+              li
+                a(href="#addUserModal", data-toggle="modal") New Admin User
+              li
+                a(href="#addCoachModal", data-toggle="modal") New Coach/Phone-Line
+              li
+                a(href='/admin/logout') Logout
+
+
+      
+    block content
+    block addUserModalBox
+    block addCoachModalBox
+    block editCoachModalBox
+    block deleteCoachModalBox
+    script(src='/js/custom.js', type='text/javascript')
+    div
+      footer
+        ul.nav.navbar-nav
+          li
+             a(href="#") © 2016 All rights reserved.

@@ -1,21 +1,40 @@
 //This code works
 var http = require('http');
-
-//var twilio = require('twilio');
+var path = require('path');
+var _    = require('lodash');
 
 var accountSid = 'AC6001bf5017425188638dab046f7cd77c';
 var authToken = "7a33bc48906e82662ab1d66ebcb20b91";
+
+//mongodb and mongoose config
 var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65";
+var mongodb = require('mongodb');
+var MongoClient = mongodb.MongoClient;
+var mongoose = require('mongoose');
+mongoose.connect(mLabUrl);
 
 var twilio = require('twilio');
 var client = require('twilio')(accountSid, authToken);
 
-var stripe = require('stripe')('sk_live_iWRrm7HN6sgf7P0tsQnmX5wO');
-var express = require('express');
-var mongodb = require('mongodb');
-var app = express()
+//var stripe = require('stripe')('sk_live_iWRrm7HN6sgf7P0tsQnmX5wO'); //Live aaccount
+var stripe = require('stripe')('sk_test_wSTkE9RipdMRufwEoG6vPPj4'); //test account
 
-var MongoClient = mongodb.MongoClient;
+var express      = require('express');
+var app          = express();
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
+
+app.use(express.static(path.join(__dirname, 'client')));
+
+//require models
+var User    = require('./models/user');
+var Coach   = require("./models/coach");
+
+//add dashboard route
+var dashboard = require("./dashboard");
+app.use('/admin', dashboard);
 
 function digitize(input) {
     var output = "";
@@ -32,12 +51,31 @@ app.all('/agent', function(req, res) {
     var twiml = new twilio.TwimlResponse();
     console.log("Attending to user");
     console.log(req.query);
-    agentDequeue(req, twiml);
-
-    res.writeHead(200, {
-        'Content-Type': 'text/xml'
+    agentDequeue(req.query.Caller).then((dequeueName) => {
+        
+        twiml.dial({}, function() {
+            this.queue(dequeueName, {
+                url: '/leaving-queue',
+                method: 'GET'
+            });
+        })
+        .redirect();
+        
+        res.writeHead(200, {
+            'Content-Type': 'text/xml'
+        });
+        return res.end(twiml.toString());    
+    }).catch((error) => {
+        twiml.say(error.message);
+        twiml.say("Unable to join queue");
+        console.log("Agent deque Error response: ",twiml.toString());
+        res.writeHead(200, {
+            'Content-Type': 'text/xml'
+        });
+        res.end(twiml.toString());    
     });
-    res.end(twiml.toString());
+
+    
 });
 
 
@@ -203,21 +241,29 @@ app.all('/set-cvv', function(req, res) {
                 else {
                     console.log(charge);
                     twiml.say("Your payment has been processed. Please hold until your party is reached");
-
-                    sendAgentMessage(req)
-                    addToQueue(req, twiml);
-                    console.log(twiml.toString());
-
-                    res.writeHead(200, {
-                        'Content-Type': 'text/xml'
+                    Coach.findOne({callLine: req.query.Called}).then((coach) => {
+                        
+                        sendAgentMessage(req, coach);
+                        addToQueue(req, twiml);    
+                        console.log(twiml.toString());
+                        res.writeHead(200, {
+                            'Content-Type': 'text/xml'
+                        });
+                        return res.end(twiml.toString());
+                    }).catch((error) => {
+                        twiml.say("No coach available");
+                        console.log(twiml.toString());
+                        res.writeHead(200, {
+                            'Content-Type': 'text/xml'
+                        });
+                        return res.end(twiml.toString());
                     });
-                    res.end(twiml.toString());
 
                 }
             });
         });
     });
-})
+});
 
 app.all('/session-ended', function(req, res) {
     console.log("User Session Call has ended");
@@ -316,6 +362,16 @@ app.all('/call-ended', function(req, res) {
                                 console.log(message.sid);
                                 res.end("Done");
                             });
+                            
+                            var callerMsg = "How was your call? Click here to tell us https://form.jotform.com/71504518100140"
+                            client.messages.create({
+                                to: req.query.Caller,
+                                from: req.query.Called,
+                                body: callerMsg,
+                            }, function(err, message) {
+                                console.log(message.sid);
+                                res.end("Done");
+                            });
                         }
                     });
                 })  
@@ -329,33 +385,24 @@ app.all('/call-ended', function(req, res) {
 })
 
 app.listen(process.env.PORT, function() {
-    console.log('Example app listening on port ' + process.env.PORT)
-})
+    console.log('Example app listening on port ' + process.env.PORT);
+});
 
-function getPhoneResponse(request, twiml) {
-    var phoneNumber = request.query.Called;
-    
-
-
-    if (phoneNumber == "+16782039844") {
-        twiml.say("Thanks for callin Coach ka year. I will try to get him on the line. When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
-         
-    }
-    else {
-        twiml.say("Thanks for callin Stacey J. When she answers, you will be charged 99 Cents per minute for the duration of the conversation");
-       
-    }
+function getPhoneResponse(request, twiml, coach) {
+    if(coach) return twiml.say(coach.textResponse);
+    else return twiml.say("Thanks for callin Stacey J. When she answers, you will be charged 99 Cents per minute for the duration of the conversation");
 }
 
-function sendAgentMessage(request) {
+function sendAgentMessage(request, coach) {
     var phoneNumber = request.query.Called;
-    var fromNumber = request.query.Caller;
+    var fromNumber  = request.query.Caller;
+    var defaultLine = "+17735800444";
     var to;
-    if (phoneNumber == "+16782039844") {
-        to = "+13365871215";
+    if (coach){
+        to = coach.messageLine;
     }
-    else {
-        to = "+17735800444";
+    else{
+        to = defaultLine;
     }
 
     client.messages.create({
@@ -377,23 +424,18 @@ function addToQueue(request, twiml) {
     });
 }
 
-function agentDequeue(request, twiml) {
-    var phoneNumber = request.query.Caller;
-    var dequeueName;
+function agentDequeue(caller) {
     //phoneNumber is the users phone. 
-    if (phoneNumber == "+17735800444") {
-        dequeueName = "onhold-+13123135483";
-    }
-    else {
-        dequeueName = "onhold-+16782039844";
-    }
-    console.log("Agent calling with ", phoneNumber, " is about to join queue:", dequeueName)
-    twiml.dial({}, function() {
-            this.queue(dequeueName, {
-                url: '/leaving-queue',
-                method: 'GET'
-            });
-        })
-        .redirect();
+    var phoneNumber = caller;
+    var dequeueName;
+    var defaultDequeue = "onhold-+16782039844";
+    return Coach.findOne({dequeueLine: phoneNumber}).then((coach) => {
+        if(_.isEmpty(coach)) dequeueName = defaultDequeue;
+        else dequeueName = "onhold-"+coach.callLine;
+        
+        console.log("Agent calling with ", phoneNumber, " is about to join queue:", dequeueName);
+        return dequeueName;
+    });
+    
 
 }

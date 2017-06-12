@@ -112,6 +112,7 @@ app.all('/set-card-number', function(req, res) {
     //Create TwiML response
     console.log(req.query);
     var callSid = req.query.CallSid;
+    var called  = req.query.Called;
     var cc = req.query.Digits;
    
     twiml.say("You entered");
@@ -124,7 +125,8 @@ app.all('/set-card-number', function(req, res) {
         var collection = db.collection('cards');
         var doc = {
             'sid': callSid,
-            'number': cc
+            'number': cc,
+            'called': called
         };
         collection.insert(doc);
 
@@ -320,78 +322,90 @@ app.all('/call-ended', function(req, res) {
         console.log("User session call just ended");
         console.log("Total Call duration is:", req.query.CallDuration);
         var duration = req.query.CallDuration;
-        var callSid = req.query.CallSid;
+        var callSid  = req.query.CallSid;
+        var called   = req.query.Called;
 
         MongoClient.connect(mLabUrl, function(err, db) {
             if (err) {
                 console.dir(err);
-                return res.end("Error");
+                return res.status(200).end();
             }
             
             db.collection('calls').findOne({
                 
             }, function(err, call){
-                if(err || call === null) return res.end("Issue retrieving call details");
+                if(err || call === null) return res.status(200).end("Issue retrieving call details");
                 
                 db.collection('cards').findOne({
                     sid: callSid
                 }, function(err, card) {
                     if (err || card === null) {
                         console.dir(err);
-                        return res.end("Error");
+                        return res.status(200).end("Error");
                     }
                     
-                    var sessionDuration = duration - call.queueTime;
-                    var amount = Math.ceil(sessionDuration / 60) * 99;
-                    var minutes = Math.ceil(sessionDuration / 60)
-                    stripe.charges.create({
-                        amount: amount,
-                        currency: "usd",
-                        capture: true,
-                        'card': {
-                            'number': card.number,
-                            'exp_month': card.expiry.substring(0, 2),
-                            'exp_year': card.expiry.substring(2, 4),
-                            'cvc': card.cvv
-                        },
-                        description: "Call Session Charge"
-                    }, function(err, charge) {
-    
-                        if (err) {
-                            console.log(err);
-                            return res.end("Error");
-                        }
-                        else {
-                            console.log(charge);
-    
-                            client.messages.create({
-                                to: "+16784278679",
-                                from: "+16786078044",
-                                body: "Your last call lasted " + minutes + " minutes",
-                                //body: "Client has been charged: $" + (amount/99), 
-                            }, function(err, message) {
-                                console.log(message.sid);
-                                res.end("Done");
-                            });
-                            
-                            var callerMsg = "How was your call? Click here to tell us https://form.jotform.com/71504518100140"
-                            client.messages.create({
-                                to: req.query.Caller,
-                                from: req.query.Called,
-                                body: callerMsg,
-                            }, function(err, message) {
-                                console.log(message.sid);
-                                res.end("Done");
-                            });
-                        }
-                    });
+                    var coachMessageLine;
+                    //get coach for called line
+                    Coach.findOne({callLine: called})
+                    .then((coach) => {
+                        var ratePerMin;
+                        if(!coach)
+                            ratePerMin = 99, coachMessageLine = "+16784278679";
+                        else
+                            ratePerMin = (coach.callRatePerMin * 100), coachMessageLine = coach.messageLine;
+                        
+                        var sessionDuration = duration - call.queueTime;
+                        var amount = Math.ceil(sessionDuration / 60) * ratePerMin;
+                        var minutes = Math.ceil(sessionDuration / 60)    
+                        
+                        return stripe.charges.create({
+                            amount: amount,
+                            currency: "usd",
+                            capture: true,
+                            'card': {
+                                'number': card.number,
+                                'exp_month': card.expiry.substring(0, 2),
+                                'exp_year': card.expiry.substring(2, 4),
+                                'cvc': card.cvv
+                            },
+                            description: "Call Session Charge"
+                        }); 
+                        
+                    })
+                    .then((charge) => {
+                        
+                        console.log("Charge: ", charge);
+
+                        client.messages.create({
+                            to: coachMessageLine,
+                            from: "+16786078044",
+                            body: "Your last call lasted " + minutes + " minutes",
+                            //body: "Client has been charged: $" + (amount/99), 
+                        }, function(err, message) {
+                            console.log(message.sid);
+                        });
+                        
+                        var callerMsg = "How was your call? Click here to tell us https://form.jotform.com/71504518100140"
+                        client.messages.create({
+                            to: req.query.Caller,
+                            from: req.query.Called,
+                            body: callerMsg,
+                        }, function(err, message) {
+                            console.log(message.sid);
+                        });
+                        res.status(200).end();
+                    })
+                    .catch((error) => {
+                        console.log("Error: ", error);
+                        res.status(200).end();
+                    })
                 })  
             })
         })
 
     }
     else {
-        return res.end("Done");
+        return res.status(200).end();
     }
 })
 

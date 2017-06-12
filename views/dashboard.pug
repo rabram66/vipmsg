@@ -22,6 +22,7 @@ block content
                 tr
                   th #
                   th Incoming Call Line
+                  th Call Rate Per Min
                   th Text Response
                   th Coach Message line
                   th Coach Dequeue Line
@@ -34,6 +35,7 @@ block content
                     tr
                       td=no
                       td(name="callLine") #{coach.callLine}
+                      td(name="callRatePerMin") #{coach.callRatePerMin}$
                       td(name="response") #{coach.textResponse}
                       td(name="messageLine") #{coach.messageLine}
                       td(name="dequeueLine") #{coach.dequeueLine}
@@ -128,6 +130,9 @@ block addCoachModalBox
                     label Call Line:
                     input.form-control(type="text" value="", name="callLine", required,placeholder="Phone line users call to join queue")
                 .form-group
+                    label Call Rate Per Minute:
+                    input.form-control(type="number",step="0.01",value="",min=0, name="callRatePerMin", required,placeholder="Amount to charge user per minute for call duration")
+                .form-group
                     label Text Response:
                     textarea.form-control(type="text" value="", name="textResponse", required, placeholder="Response given to user after successful initial charge on card")
                 .form-group
@@ -158,6 +163,9 @@ block editCoachModalBox
                 .form-group
                     label Call Line:
                     input.form-control(type="text" value="", name="callLine", required,placeholder="Phone line users call to join queue")
+                .form-group
+                    label Call Rate Per Minute:
+                    input.form-control(type="number",step="0.01",value="",min=0, name="callRatePerMin", required,placeholder="Amount to charge user per minute for call duration")
                 .form-group
                     label Text Response:
                     textarea.form-control(type="text" value="", name="textResponse", required, placeholder="Response given to user after successful initial charge on card")

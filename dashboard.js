@@ -83,6 +83,7 @@ router.post('/new/user', function(req, res, next) {
 router.post('/new/coach', function(req, res, next) {
     var coach = new Coach({
        callLine: req.body.callLine,
+       callRatePerMin: req.body.callRatePerMin,
        textResponse: req.body.textResponse,
        messageLine: req.body.messageLine,
        dequeueLine: req.body.dequeueLine
@@ -99,6 +100,7 @@ router.post('/edit/coach', function(req, res, next) {
     var id = req.body.id;
     var coach = {
        callLine: req.body.callLine,
+       callRatePerMin: req.body.callRatePerMin,
        textResponse: req.body.textResponse,
        messageLine: req.body.messageLine,
        dequeueLine: req.body.dequeueLine

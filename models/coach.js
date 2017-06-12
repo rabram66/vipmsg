@@ -3,8 +3,9 @@ var mongoose = require('mongoose');
 
 var CoachSchema = new mongoose.Schema({
   callLine       : String,
+  callRatePerMin : { type: Number, default: 0.99 },
   textResponse   : String,
-  messageLine	 : String,
+  messageLine	   : String,
   dequeueLine    : String,
 });
 

@@ -375,6 +375,8 @@ app.all('/call-ended', function(req, res) {
                     .then((charge) => {
                         
                         console.log("Charge: ", charge);
+                                var sessionDuration = duration - call.queueTime;
+                                var minutes = Math.ceil(sessionDuration / 60);
 
                         client.messages.create({
                             to: coachMessageLine,
@@ -385,7 +387,7 @@ app.all('/call-ended', function(req, res) {
                             console.log(message.sid);
                         });
                         
-                        var callerMsg = "How was your call? Click here to tell us https://form.jotform.com/71504518100140"
+                        var callerMsg = "How was your call? Click here to tell us https://form.jotform.com/71504518100140";
                         client.messages.create({
                             to: req.query.Caller,
                             from: req.query.Called,

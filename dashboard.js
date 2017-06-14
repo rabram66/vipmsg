@@ -56,6 +56,15 @@ router.post('/login', passport.authenticate('local', {
     successRedirect: '/admin/dashboard',
     failureRedirect: 'login' 
 }));
+
+router.get('/coach/login', function(req, res){
+    res.render('login2', {login: true});
+})
+
+router.post('/coach/login', passport.authenticate('local', { 
+    successRedirect: '/admin/coach/dashboard',
+    failureRedirect: 'coach/login' 
+}));
             
 // All routes after this require authentication                
 router.all('*', (req, res, next) => {

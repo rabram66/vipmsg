@@ -18,17 +18,20 @@ html
         .navbar-default.sidebar(role='navigation')
           .sidebar-nav.navbar-collapse
             ul#side-menu.nav.in
-              li.sidebar-search
-                form(action='/coaches/search',method='post')
-                  .input-group.custom-search-form
-                    input.form-control(type="text",placeholder="Search Coaches",name='query')
-                    span.input-group-btn
+              if !coach
+                li.sidebar-search
+                  form(action='/coaches/search',method='post')
+                    .input-group.custom-search-form
+                      input.form-control(type="text",placeholder="Search Coaches",name='query')
+                      span.input-group-btn
               li
-                a(href="/admin/dashboard") Home
-              li
-                a(href="#addUserModal", data-toggle="modal") New Admin User
-              li
-                a(href="#addCoachModal", data-toggle="modal") New Coach/Phone-Line
+                a(href="#") Home
+              if !coach
+                li
+                  a(href="#addUserModal", data-toggle="modal") New Admin User
+              if !coach
+                li
+                  a(href="#addCoachModal", data-toggle="modal") New Coach/Phone-Line
               li
                 a(href='/admin/logout') Logout
 
@@ -40,6 +43,9 @@ html
     block editCoachModalBox
     block deleteCoachModalBox
     script(src='/js/custom.js', type='text/javascript')
+    script(src="/socket.io/socket.io.js")
+    script.
+      var socket = io();
     div
       footer
         ul.nav.navbar-nav

@@ -1,0 +1,87 @@
+extends layout
+
+block content
+  div#page-wrapper
+    if error
+      .row
+        div.alert.alert-success.alert-dismissible(role="alert")
+          button.close(type="button",data-dismiss="alert",aria-label="Close")
+            |&times;
+          |#{error}
+        
+    .row
+      h2 My Profile
+    
+    .row
+      .panel.panel-default
+        .panel-heading My Details
+          .btn-group
+            - var status = coach.isAvailable ? "Online " : "Offline "
+            button.btn.btn-info.dropdown-toggle(type="button",data-toggle="dropdown", data-offline-text="Availability - Offline", data-online-text="Availability - Online") Availability - #{status}
+              span.caret
+            ul.dropdown-menu
+              li
+                a(href="#") Online
+              li
+                a(href="#") Offline
+        .panel-body
+          .table-responsive
+            table.table
+              thead
+                tr
+                  th Incoming Call Line
+                  th Call Rate Per Min
+                  th Text Response
+                  th Message line
+                  th Dequeue Line
+                  th Action
+              tbody
+                if coach
+                  tr
+                    td(name="callLine") #{coach.callLine}
+                    td(name="callRatePerMin") #{coach.callRatePerMin}$
+                    td(name="response") #{coach.textResponse}
+                    td(name="messageLine") #{coach.messageLine}
+                    td(name="dequeueLine") #{coach.dequeueLine}
+                    td 
+                      a.btn.btn-success(href="#editCoachModal", data-toggle="modal", data-id=""+coach._id) Edit Details
+                else
+                  tr
+                    td No Data
+    
+
+block editCoachModalBox
+  <!-- Edit Coach Modal -->
+  div#editCoachModal.modal.fade(role="dialog")
+    .modal-dialog.modal-lg
+      .modal-content
+        form#simpleForm(action="/admin/edit/coach", method="post")
+          .modal-header
+            button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
+            h4#myModalLabel.modal-title
+              |Edit Coach/Phone-Line
+          .modal-body
+            .row
+              div(style="padding:20px")
+                input(type="hidden",required, name="id")
+                .form-group
+                    label Name:
+                    input.form-control(type="text" value="", name="name", required,placeholder="Coach name")
+                .form-group
+                    label Call Line:
+                    input.form-control(type="text" value="", name="callLine", required,placeholder="Phone line users call to join queue")
+                .form-group
+                    label Call Rate Per Minute:
+                    input.form-control(type="number",step="0.01",value="",min=0, name="callRatePerMin", required,placeholder="Amount to charge user per minute for call duration")
+                .form-group
+                    label Text Response:
+                    textarea.form-control(type="text" value="", name="textResponse", required, placeholder="Response given to user after successful initial charge on card")
+                .form-group
+                    label Message Line:
+                    input.form-control(type="text" value="", name="messageLine", placeholder="Coach phone line text messages are sent to when new users join queue")
+                .form-group
+                    label Dequeue Line:
+                    input.form-control(type="text" value="", name="dequeueLine", placeholder="Phone line coach must use to call in order to attend to users")
+          .modal-footer
+            button.btn.btn-success(type="submit") Save
+            button.btn.btn-default(type="button",data-dismiss="modal") close

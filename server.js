@@ -1,5 +1,4 @@
 //This code works
-var http = require('http');
 var path = require('path');
 var _    = require('lodash');
 
@@ -16,11 +15,17 @@ mongoose.connect(mLabUrl);
 var twilio = require('twilio');
 var client = require('twilio')(accountSid, authToken);
 
-var stripe = require('stripe')('sk_live_iWRrm7HN6sgf7P0tsQnmX5wO'); //Live aaccount
-//var stripe = require('stripe')('sk_test_wSTkE9RipdMRufwEoG6vPPj4'); //test account
+//var stripe = require('stripe')('sk_live_iWRrm7HN6sgf7P0tsQnmX5wO'); //Live aaccount
+var stripe = require('stripe')('sk_test_wSTkE9RipdMRufwEoG6vPPj4'); //test account
 
 var express      = require('express');
 var app          = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+
+io.on('connection', function(socket){
+  console.log('a user connected');
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -33,8 +38,18 @@ var User    = require('./models/user');
 var Coach   = require("./models/coach");
 
 //add dashboard route
-var dashboard = require("./dashboard");
+var dashboard = require("./dashboard")(io);
 app.use('/admin', dashboard);
+
+app.get('/coaches', function(req, res) {
+    Coach.find({}, 'name callLine isAvailable').exec()
+        .then( coaches => {
+            return res.json(coaches);
+        })
+        .catch( err => {
+            return res.status(500).json(err);
+        })
+})
 
 function digitize(input) {
     var output = "";
@@ -84,13 +99,19 @@ app.all('/start-call', function(req, res) {
     var twiml = new twilio.TwimlResponse();
     Coach.findOne({callLine: req.query.Called}).then((coach) => {
         console.log("Coach:", coach);
-        getPhoneResponse(req, twiml, coach);
-        twiml.say("Please enter your debit card number followed by the hash key.");
-        twiml.gather({
-            action: "/set-card-number",
-            method: "GET",
-            timeout: 30,
-        });
+        if(!coach.isAvailable){
+            twiml.say('That coach is not available please try again later');
+            twiml.hangup();
+        }else {
+            getPhoneResponse(req, twiml, coach);
+            twiml.say("Please enter your debit card number followed by the hash key.");
+            twiml.gather({
+                action: "/set-card-number",
+                method: "GET",
+                timeout: 30,
+            });    
+        }
+        
         console.log(twiml.toString());
         res.writeHead(200, {
             'Content-Type': 'text/xml'
@@ -324,6 +345,7 @@ app.all('/call-ended', function(req, res) {
         var duration = req.query.CallDuration;
         var callSid  = req.query.CallSid;
         var called   = req.query.Called;
+        var minutes;
 
         MongoClient.connect(mLabUrl, function(err, db) {
             if (err) {
@@ -356,7 +378,7 @@ app.all('/call-ended', function(req, res) {
                         
                         var sessionDuration = duration - call.queueTime;
                         var amount = Math.ceil(sessionDuration / 60) * ratePerMin;
-                        var minutes = Math.ceil(sessionDuration / 60)    
+                        minutes = Math.ceil(sessionDuration / 60)    
                         
                         return stripe.charges.create({
                             amount: amount,
@@ -375,8 +397,6 @@ app.all('/call-ended', function(req, res) {
                     .then((charge) => {
                         
                         console.log("Charge: ", charge);
-                                var sessionDuration = duration - call.queueTime;
-                                var minutes = Math.ceil(sessionDuration / 60);
 
                         client.messages.create({
                             to: coachMessageLine,
@@ -387,7 +407,7 @@ app.all('/call-ended', function(req, res) {
                             console.log(message.sid);
                         });
                         
-                        var callerMsg = "How was your call? Click here to tell us https://form.jotform.com/71504518100140";
+                        var callerMsg = "How was your call? Click here to tell us https://form.jotform.com/71504518100140"
                         client.messages.create({
                             to: req.query.Caller,
                             from: req.query.Called,
@@ -395,7 +415,11 @@ app.all('/call-ended', function(req, res) {
                         }, function(err, message) {
                             console.log(message.sid);
                         });
+                        
                         res.status(200).end();
+                        return db.collection('cards').findOneAndDelete({
+                            sid: callSid
+                        });
                     })
                     .catch((error) => {
                         console.log("Error: ", error);
@@ -411,7 +435,7 @@ app.all('/call-ended', function(req, res) {
     }
 })
 
-app.listen(process.env.PORT, function() {
+http.listen(process.env.PORT, function() {
     console.log('Example app listening on port ' + process.env.PORT);
 });
 

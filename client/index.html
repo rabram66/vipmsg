@@ -14,81 +14,60 @@
       function ChatController($scope) {
         var socket = io.connect();
 
-        $scope.messages = [];
-        $scope.roster = [];
-        $scope.name = '';
-        $scope.text = '';
+        $scope.coaches = [];
+        $scope.getAvailability = function(coach) {
+          return coach.isAvailable ? 'Available' : 'Unavailable';
+        }
+        fetch('/coaches')
+          .then( function (response) {
+            console.log("res:",response.ok);
+            return response.json();
+          })
+          .then( function (coaches) {
+            $scope.coaches = coaches;
+            $scope.$apply();
+          })
+          .catch( function (err) {
+            console.log(err);
+          });
 
-        socket.on('connect', function () {
-          $scope.setName();
-        });
-
-        socket.on('message', function (msg) {
-          $scope.messages.push(msg);
+        socket.on('availability_change', function (change) {
+          console.log(change);
+          var coach = $scope.coaches.find(function(coach){
+            return coach._id === change.id; 
+          });
+          coach.isAvailable = change.availability;
           $scope.$apply();
         });
-
-        socket.on('roster', function (names) {
-          $scope.roster = names;
-          $scope.$apply();
-        });
-
-        $scope.send = function send() {
-          console.log('Sending message:', $scope.text);
-          socket.emit('message', $scope.text);
-          $scope.text = '';
-        };
-
-        $scope.setName = function setName() {
-          socket.emit('identify', $scope.name);
-        };
       }
     </script>
   </head>
   <body>
     <div class="container" ng-controller="ChatController">
       <div class="navbar navbar-fixed-top navbar-inverse">
-        <div class="navbar-inner">
-          <div class="pull-right">
-            <a href="https://c9.io" class="brand">Cloud9 IDE</a>
-          </div>
-        </div>
+        <h4>VIP MSG</h4>
       </div>
       <div class="page-header">
-        <h1>Chat Example</h1>
+        <h1>Coach Availability</h1>
       </div>
       <div class="row">
-        <div class="span3">
-          <ul class="nav nav-list well">
-            <li class="nav-header">Local Users</li>
-            <li ng-repeat="user in roster" ng-bind="user">
-            </li>
-          </ul>
-        </div>
         <div class="span9">
           <table class="table table-striped table-bordered">
             <thead>
               <tr>
                 <th class="span2">Name</th>
-                <th class="span7">Text</th>
+                <th class="span7">Phone Line</th>
+                <th class="span7">Availability</th>
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="msg in messages">
-                <td class="span2" ng-bind="msg.name"></td>
-                <td class="span7" ng-bind="msg.text"></td>
+              <tr ng-repeat="coach in coaches">
+                <td class="span2" ng-bind="coach.name"></td>
+                <td class="span7" ng-bind="coach.callLine"></td>
+                <td class="span7" ng-bind="getAvailability(coach)"></td>
               </tr>
             </tbody>
           </table>
-          <div class="row controls">
-            <form ng-submit="send()">
-              <div class="span2"><input type="text" class="input-block-level" ng-model="name" ng-change="setName()" placeholder="Your Name"></div>
-              <div class="input-append span7">
-                <input type="text" class="span6" ng-model="text" placeholder="Message">
-                <input type="submit" class="span1 btn btn-primary" value="Send" ng-disabled="!text">
-              </div>
-            </form>
-          </div>
         </div>
       </div>
     </div>

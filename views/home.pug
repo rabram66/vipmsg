@@ -10,7 +10,7 @@ block content
           |#{error}
         
     .row
-      h2 List of Coaches/Phone Lines
+      h2 List of Coaches
     
     .row
       .panel.panel-default
@@ -26,8 +26,6 @@ block content
                   th Text Response
                   th Coach Message line
                   th Coach Dequeue Line
-                  th Coach Name
-                  th Coach Username
                   th Action
               tbody
                 if coaches
@@ -41,9 +39,6 @@ block content
                       td(name="response") #{coach.textResponse}
                       td(name="messageLine") #{coach.messageLine}
                       td(name="dequeueLine") #{coach.dequeueLine}
-                      td(name="name") #{coach.name}
-                      td(name="username") #{coach.username}
-                      input(type="hidden", name="password" value="{coach.password}")
                       td 
                         a.btn.btn-success(href="#editCoachModal", data-toggle="modal", data-id=""+coach._id) Edit Details
                         a.btn.btn-danger(href="#deleteCoachModal", data-toggle="modal", data-id=""+coach._id) Delete Coach
@@ -132,9 +127,6 @@ block addCoachModalBox
             .row
               div(style="padding:20px")
                 .form-group
-                    label Name:
-                    input.form-control(type="text" value="", name="name", required,placeholder="Coach name")
-                .form-group
                     label Call Line:
                     input.form-control(type="text" value="", name="callLine", required,placeholder="Phone line users call to join queue")
                 .form-group
@@ -149,12 +141,6 @@ block addCoachModalBox
                 .form-group
                     label Dequeue Line:
                     input.form-control(type="text" value="", name="dequeueLine", placeholder="Phone line coach must use to call in order to attend to users")
-                .form-group
-                    label Username:
-                    input.form-control(type="text" value="", name="username", placeholder="Coach login username")
-                .form-group
-                    label Password:
-                    input.form-control(type="password" value="", name="password", placeholder="Coach login password")
           .modal-footer
             button.btn.btn-success(type="submit") Save
             button.btn.btn-default(type="button",data-dismiss="modal") close
@@ -175,9 +161,6 @@ block editCoachModalBox
               div(style="padding:20px")
                 input(type="hidden",required, name="id")
                 .form-group
-                    label Name:
-                    input.form-control(type="text" value="", name="name", required,placeholder="Coach name")
-                .form-group
                     label Call Line:
                     input.form-control(type="text" value="", name="callLine", required,placeholder="Phone line users call to join queue")
                 .form-group
@@ -192,13 +175,6 @@ block editCoachModalBox
                 .form-group
                     label Dequeue Line:
                     input.form-control(type="text" value="", name="dequeueLine", placeholder="Phone line coach must use to call in order to attend to users")
-                .form-group
-                    label Username:
-                    input.form-control(type="text" value="", name="username", placeholder="Coach login username")
-                .form-group
-                    label Password:
-                    input.form-control(type="password" value="", style="display:none")
-                    input.form-control(type="password" value="", name="password2", placeholder="Coach login password")
           .modal-footer
             button.btn.btn-success(type="submit") Save
             button.btn.btn-default(type="button",data-dismiss="modal") close

@@ -4,6 +4,8 @@ var bcrypt   = require('bcrypt-nodejs');
 
 var CoachSchema = new mongoose.Schema({
   name           : String,
+  imageURL       : String,
+  bio            : String,
   callLine       : String,
   callRatePerMin : { type: Number, default: 0.99 },
   textResponse   : String,

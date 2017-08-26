@@ -17,6 +17,8 @@ var client = require('twilio')(accountSid, authToken);
 
 var stripe = require('stripe')('sk_live_iWRrm7HN6sgf7P0tsQnmX5wO'); //Live aaccount
 //var stripe = require('stripe')('sk_test_wSTkE9RipdMRufwEoG6vPPj4'); //test account
+//hold 100 instead of 1 
+
 
 var express      = require('express');
 var app          = express();
@@ -244,10 +246,15 @@ app.all('/set-cvv', function(req, res) {
 
             console.log(results);
 
+            //change amount to 10,000 
+            //change capture to false (changing to false, holds it, and it can be held up to 7 days)
+            //if the the transcation goes through you should receive a charge object
+            //make a statement such as:
+            //if (charge) go through with payment process and make variable called total price and say if total price > 100 then refund total price - 100 and then set the stripe.charges.id.capture: true. if error, return.  
             stripe.charges.create({
                 amount: 100,
                 currency: "usd",
-                capture: true,
+                capture: false,
                 'card': {
                     'number': result.number,
                     'exp_month': result.expiry.substring(0, 2),

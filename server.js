@@ -3,9 +3,10 @@ var path = require('path');
 var _    = require('lodash');
 
 var accountSid = 'AC6001bf5017425188638dab046f7cd77c';
-var authToken = "7a33bc48906e82662ab1d66ebcb20b91";
+var authToken = "7a33bc48906e82662ab1d66ebcb20b91"; 
 
 //mongodb and mongoose config
+//var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds161873.mlab.com:61873/heroku_pb8gktr9";
 var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65";
 var mongodb = require('mongodb');
 var MongoClient = mongodb.MongoClient;
@@ -17,13 +18,17 @@ var client = require('twilio')(accountSid, authToken);
 
 var stripe = require('stripe')('sk_live_iWRrm7HN6sgf7P0tsQnmX5wO'); //Live aaccount
 //var stripe = require('stripe')('sk_test_wSTkE9RipdMRufwEoG6vPPj4'); //test account
-//hold 100 instead of 1 
+var chargeID;
 
 
 var express      = require('express');
 var app          = express();
 var http = require('http').Server(app);
+var bodyParser = require('body-parser');
 var io = require('socket.io')(http);
+
+
+app.use(bodyParser.urlencoded({ extended: false } ));
 
 io.on('connection', function(socket){
   console.log('a user connected');
@@ -50,8 +55,8 @@ app.get('/coaches', function(req, res) {
         })
         .catch( err => {
             return res.status(500).json(err);
-        })
-})
+        });
+});
 
 function digitize(input) {
     var output = "";
@@ -95,18 +100,17 @@ app.all('/agent', function(req, res) {
     
 });
 
-
 app.all('/start-call', function(req, res) {
     //Create TwiML response
     var twiml = new twilio.TwimlResponse();
     Coach.findOne({callLine: req.query.Called}).then((coach) => {
         console.log("Coach:", coach);
         if(!coach.isAvailable){
-            twiml.say('That coach is not available please try again later');
+            twiml.say('That coach is not available, please try again later');
             twiml.hangup();
         }else {
             getPhoneResponse(req, twiml, coach);
-            twiml.say("Please enter your debit card number followed by the hash key.");
+            twiml.say("Please enter your debit or credit card number followed by the pound sign.");
             twiml.gather({
                 action: "/set-card-number",
                 method: "GET",
@@ -120,17 +124,17 @@ app.all('/start-call', function(req, res) {
         });
         res.end(twiml.toString());    
     }).catch((error) => {
-        twiml.say("Please enter your debit card number followed by the hash key.");
+        twiml.say("Please enter your debit or credit card number followed by the pound sign.");
         console.log(twiml.toString());
         res.writeHead(200, {
             'Content-Type': 'text/xml'
         });
         res.end(twiml.toString());    
-    })
+    });
     
 });
 
-app.all('/set-card-number', function(req, res) {
+app.all('/set-card-number', function(req, res) { //capture card
     var twiml = new twilio.TwimlResponse();
     //Create TwiML response
     console.log(req.query);
@@ -153,7 +157,7 @@ app.all('/set-card-number', function(req, res) {
         };
         collection.insert(doc);
 
-        twiml.say("Please enter your expiration date followed by the hash key");
+        twiml.say("Please enter your expiration date followed by the pound sign.");
         twiml.gather({
             action: "/set-expiry",
             method: "GET",
@@ -236,7 +240,7 @@ app.all('/set-cvv', function(req, res) {
             $set: doc
         });
 
-        twiml.say("Alright we are processing your payment now.");
+        twiml.say("Alright we are processing your payment now. Remember, the first five minutes are free.");
 
         collection.find({
             sid: callSid
@@ -252,7 +256,7 @@ app.all('/set-cvv', function(req, res) {
             //make a statement such as:
             //if (charge) go through with payment process and make variable called total price and say if total price > 100 then refund total price - 100 and then set the stripe.charges.id.capture: true. if error, return.  
             stripe.charges.create({
-                amount: 100,
+               amount: 10000,
                 currency: "usd",
                 capture: false,
                 'card': {
@@ -261,7 +265,7 @@ app.all('/set-cvv', function(req, res) {
                     'exp_year': result.expiry.substring(2, 4),
                     'cvc': result.cvv
                 },
-                description: "Charge for first minute"
+                description: "Call Session Charge"
             }, function(err, charge) {
 
                 if (err) {
@@ -281,6 +285,8 @@ app.all('/set-cvv', function(req, res) {
                 }
                 else {
                     console.log(charge);
+                    chargeID=charge.id;
+                    
                     twiml.say("Your payment has been processed. Please hold until your party is reached");
                     Coach.findOne({callLine: req.query.Called}).then((coach) => {
                         
@@ -309,7 +315,7 @@ app.all('/set-cvv', function(req, res) {
 app.all('/session-ended', function(req, res) {
     console.log("User Session Call has ended");
     console.log("Query", req.query);
-})
+});
 
 app.all('/leaving-queue', function(req, res) {
     console.log("Query", req.query);
@@ -343,7 +349,7 @@ app.all('/leaving-queue', function(req, res) {
 })
 
 app.all('/call-ended', function(req, res) {
-    console.log("User Call has ended")
+    console.log("User Call has ended");
     console.log("Query:", req.query);
     var callStatus = req.query.CallStatus;
     if (callStatus == "completed") {
@@ -382,28 +388,28 @@ app.all('/call-ended', function(req, res) {
                             ratePerMin = 99, coachMessageLine = "+16784278679";
                         else
                             ratePerMin = (coach.callRatePerMin * 100), coachMessageLine = coach.messageLine;
-                        
+                        var promoDiscountTime=300;
                         var sessionDuration = duration - call.queueTime;
-                        var amount = Math.ceil(sessionDuration / 60) * ratePerMin;
-                        minutes = Math.ceil(sessionDuration / 60)    
+                        var amount;
+                        minutes = Math.ceil(sessionDuration / 60);    
                         
-                        return stripe.charges.create({
-                            amount: amount,
-                            currency: "usd",
-                            capture: true,
-                            'card': {
-                                'number': card.number,
-                                'exp_month': card.expiry.substring(0, 2),
-                                'exp_year': card.expiry.substring(2, 4),
-                                'cvc': card.cvv
-                            },
-                            description: "Call Session Charge"
-                        }); 
-                        
+                        if(sessionDuration>=310){
+                        amount = Math.ceil((sessionDuration-promoDiscountTime)/ 60) * ratePerMin;
+                            stripe.charges.capture(chargeID, {
+                                amount: amount,
+                                receipt_email:"ksd11b@my.fsu.edu",
+                                statement_descriptor:"VIP call "+req.query.To
+                            } );
+                
+                        }else{
+                        stripe.refunds.create({ 
+                        charge: chargeID
+                        }, function(err, refund) { }); 
+                            
+                        }
                     })
                     .then((charge) => {
-                        
-                        console.log("Charge: ", charge);
+                        console.log("Call info: ", req.query);
 
                         client.messages.create({
                             to: coachMessageLine,
@@ -414,7 +420,7 @@ app.all('/call-ended', function(req, res) {
                             console.log(message.sid);
                         });
                         
-                        var callerMsg = "How was your call? Click here to tell us https://form.jotform.com/71504518100140"
+                        var callerMsg = "How was your call? Click here to tell us https://form.jotform.com/71504518100140";
                         client.messages.create({
                             to: req.query.Caller,
                             from: req.query.Called,
@@ -431,16 +437,16 @@ app.all('/call-ended', function(req, res) {
                     .catch((error) => {
                         console.log("Error: ", error);
                         res.status(200).end();
-                    })
-                })  
-            })
-        })
+                    });
+                });
+            });
+        });
 
     }
     else {
         return res.status(200).end();
     }
-})
+});
 
 http.listen(process.env.PORT, function() {
     console.log('Example app listening on port ' + process.env.PORT);
@@ -448,7 +454,7 @@ http.listen(process.env.PORT, function() {
 
 function getPhoneResponse(request, twiml, coach) {
     if(coach) return twiml.say(coach.textResponse);
-    else return twiml.say("Thanks for callin Coach ka year When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
+    else return twiml.say("Thanks for calling Coach ka year When he answers, you will be charged 99 Cents per minute for the duration of the conversation");
 }
 
 function sendAgentMessage(request, coach) {

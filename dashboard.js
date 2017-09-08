@@ -5,7 +5,8 @@ var router  = require('express').Router(),
     LocalStrategy = require('passport-local').Strategy,
     mongoose = require("mongoose");
 var _    = require('lodash');
-var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65";
+var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds161873.mlab.com:61873/heroku_pb8gktr9";
+//var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65";
 
 //require models
 var User    = require('./models/user');

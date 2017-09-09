@@ -256,7 +256,7 @@ app.all('/set-cvv', function(req, res) {
             //make a statement such as:
             //if (charge) go through with payment process and make variable called total price and say if total price > 100 then refund total price - 100 and then set the stripe.charges.id.capture: true. if error, return.  
             stripe.charges.create({
-               amount: 10000,
+               amount: 1000,
                 currency: "usd",
                 capture: false,
                 'card': {

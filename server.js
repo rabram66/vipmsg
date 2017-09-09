@@ -240,7 +240,7 @@ app.all('/set-cvv', function(req, res) {
             $set: doc
         });
 
-        twiml.say("Alright we are processing your payment now. Remember, the first five minutes are free.");
+        twiml.say("Alright we are processing your payment now."); // Remember, the first five minutes are free.
 
         collection.find({
             sid: callSid
@@ -256,7 +256,7 @@ app.all('/set-cvv', function(req, res) {
             //make a statement such as:
             //if (charge) go through with payment process and make variable called total price and say if total price > 100 then refund total price - 100 and then set the stripe.charges.id.capture: true. if error, return.  
             stripe.charges.create({
-               amount: 1000,
+               amount: 1000, //reduced amount to $10 until workaround is in place.
                 currency: "usd",
                 capture: false,
                 'card': {

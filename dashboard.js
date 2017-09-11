@@ -143,6 +143,7 @@ module.exports = function (io ) {
             coach.messageLine = req.body.messageLine;
             coach.dequeueLine = req.body.dequeueLine;
             coach.username = req.body.username;
+            coach.img_URL = req.body.img_URL;
             if(req.body.password2) coach.password = req.body.password2;
             return coach.save();
         })

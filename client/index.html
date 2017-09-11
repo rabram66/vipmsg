@@ -3,8 +3,12 @@
   <head>
     <title>Chat Example</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/bootstrap-responsive.min.css">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+      <link rel="stylesheet" href="/css/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    
     <style>
       body {
         padding-top: 60px;
@@ -50,6 +54,32 @@
       <div class="page-header">
         <h1>Coach Availability</h1>
       </div>
+    <!--Repeating Div-->
+<div class="container">
+  <div class="row" ng-repeat="coach in coaches | filter: 'astro'">
+    <div class="col-md-2">
+      <span class="h3">{{coach.name}}</span><br>
+      <img ng-src="{{coach.img_URL}}" style="width:200px; height:200px;">
+    </div>
+    <div class="col">
+    <br> <h4>{{coach.headline}}</h4><br>
+     <p>{{coach.about}}</p>
+    </div>
+    <div class="col">
+       <br> <div class="btn btn-success">Call Now<br><p>{{coach.callLine}}</p></div>
+    </div>
+  </div>
+</div>
+
+               <!--<img ng-src="coach.imgURL" style="height:150px; width:200px">-->
+               
+      </div
+        
+        
+      </div>
+      
+      
+      
       <div class="row">
         <div class="span9">
           <table class="table table-striped table-bordered">
@@ -75,5 +105,6 @@
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/angular.min.js"></script>
+     <script src="/js/custom.js"></script>
   </body>
 </html>

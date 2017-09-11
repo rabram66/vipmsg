@@ -49,7 +49,7 @@ var dashboard = require("./dashboard")(io);
 app.use('/admin', dashboard);
 
 app.get('/coaches', function(req, res) {
-    Coach.find({}, 'name callLine isAvailable').exec()
+    Coach.find({}, 'name callLine isAvailable img_URL about headline category').exec()
         .then( coaches => {
             return res.json(coaches);
         })
@@ -57,6 +57,43 @@ app.get('/coaches', function(req, res) {
             return res.status(500).json(err);
         });
 });
+// app.get('/coachlist', function(req, res) {
+//     Coach.find({}, 'name callLine img_URL about').exec()
+//         .then( coaches => {
+//             return res.json(coaches);
+//         })
+//         .catch( err => {
+//             return res.status(500).json(err);
+//         });
+// });
+app.filter('phoneNumber', function () {
+        return function (number) {
+            if (!number) { return ''; }
+            number = String(number);
+            number = number.replace(/[^0-9]*/g, '');
+            var formattedNumber = number;
+ 
+            var c = (number[0] == '1') ? '1' : '';
+            number = number[0] == '1' ? number.slice(1) : number;
+ 
+            var area = number.substring(0, 3);
+            var front = number.substring(3, 6);
+            var end = number.substring(6, 10);
+ 
+            if (front) {
+                formattedNumber = (c + "(" + area + ") " + front);
+            }
+            if (end) {
+                formattedNumber += ("-" + end);
+            }
+            return formattedNumber;
+        };
+    });
+    app.filter('phone').text(function(i, text) {
+        text = text.substring(2);
+        formatNumber = text.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+        return formatNumber;
+    });
 
 function digitize(input) {
     var output = "";

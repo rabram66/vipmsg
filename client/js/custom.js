@@ -66,3 +66,10 @@ $('div.btn-group ul.dropdown-menu li a').click(function (e) {
         })
     return false;
 });
+
+$(".phone").text(function(i, text) {
+        text = text.substring(2);
+        formatNumber = text.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+        return formatNumber;
+    });
+    

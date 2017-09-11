@@ -4,11 +4,10 @@
     <title>Chat Example</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
-<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
+<!--<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>-->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
       <link rel="stylesheet" href="/css/style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    
     <style>
       body {
         padding-top: 60px;
@@ -56,7 +55,7 @@
       </div>
     <!--Repeating Div-->
 <div class="container">
-  <div class="row" ng-repeat="coach in coaches | filter: 'astro'">
+  <div class="row" ng-repeat="coach in coaches|filter:'astro'">
     <div class="col-md-2">
       <span class="h3">{{coach.name}}</span><br>
       <img ng-src="{{coach.img_URL}}" style="width:200px; height:200px;">
@@ -66,7 +65,7 @@
      <p>{{coach.about}}</p>
     </div>
     <div class="col">
-       <br> <div class="btn btn-success">Call Now<br><p>{{coach.callLine}}</p></div>
+       <br> <div class="btn btn-success">Call Now<br>{{coach.callLine}}</div>
     </div>
   </div>
 </div>
@@ -105,6 +104,5 @@
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/angular.min.js"></script>
-     <script src="/js/custom.js"></script>
   </body>
 </html>

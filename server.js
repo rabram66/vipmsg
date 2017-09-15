@@ -16,8 +16,8 @@ mongoose.connect(mLabUrl);
 var twilio = require('twilio');
 var client = require('twilio')(accountSid, authToken);
 
-var stripe = require('stripe')('sk_live_iWRrm7HN6sgf7P0tsQnmX5wO'); //Live aaccount
-//var stripe = require('stripe')('sk_test_wSTkE9RipdMRufwEoG6vPPj4'); //test account
+//var stripe = require('stripe')('sk_live_iWRrm7HN6sgf7P0tsQnmX5wO'); //Live aaccount
+var stripe = require('stripe')('sk_test_wSTkE9RipdMRufwEoG6vPPj4'); //test account
 var chargeID;
 
 
@@ -353,13 +353,18 @@ app.all('/call-ended', function(req, res) {
     console.log("Query:", req.query);
     var callStatus = req.query.CallStatus;
     if (callStatus == "completed") {
+        
         console.log("User session call just ended");
         console.log("Total Call duration is:", req.query.CallDuration);
         var duration = req.query.CallDuration;
         var callSid  = req.query.CallSid;
         var called   = req.query.Called;
         var minutes;
-
+      if (callStatus =="completed" || "no-answer" || "busy"){
+          stripe.refunds.create({ 
+                        charge: chargeID
+                        }, function(err, refund) { }); 
+    }
         MongoClient.connect(mLabUrl, function(err, db) {
             if (err) {
                 console.dir(err);
@@ -395,20 +400,23 @@ app.all('/call-ended', function(req, res) {
                         
                         if(sessionDuration>=310){
                         amount = Math.ceil((sessionDuration-promoDiscountTime)/ 60) * ratePerMin;
-                            stripe.charges.capture(chargeID, {
-                                amount: amount,
-                                receipt_email:"ksd11b@my.fsu.edu",
-                                statement_descriptor:"VIP call "+req.query.To
-                            } );
-                
-                        }else{
-                        stripe.refunds.create({ 
-                        charge: chargeID
-                        }, function(err, refund) { }); 
-                            
-                        }
+                        return stripe.charges.create({
+                            amount: amount,
+                            currency: "usd",
+                            capture: true,
+                            'card': {
+                                'number': card.number,
+                                'exp_month': card.expiry.substring(0, 2),
+                                'exp_year': card.expiry.substring(2, 4),
+                                'cvc': card.cvv
+                            },
+                           description: "Call Session Charge, Session Duration: "+sessionDuration+" Duration: "+duration +"Queue Time: "+call.queueTime
+                        
+                        });  }
+                        
                     })
                     .then((charge) => {
+                        console.log("Charge: ", charge);
                         console.log("Call info: ", req.query);
 
                         client.messages.create({

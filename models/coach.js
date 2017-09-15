@@ -5,7 +5,6 @@ var bcrypt   = require('bcrypt-nodejs');
 var CoachSchema = new mongoose.Schema({
   name           : String,
   imageURL       : String,
-  image_URL       : String,
   bio            : String,
   callLine       : String,
   callRatePerMin : { type: Number, default: 0.99 },
@@ -14,9 +13,7 @@ var CoachSchema = new mongoose.Schema({
   dequeueLine    : String,
   username       : String,
   password       : String,
-  isAvailable    : Boolean,
-  about           :String,
-  category      :String,
+  isAvailable    : Boolean
 });
 
 CoachSchema.pre('save', function (next){

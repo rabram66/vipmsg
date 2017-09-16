@@ -16,7 +16,8 @@ block content
       .panel.panel-default
         .panel-heading My Details
           .btn-group
-            - var status = coach.isAvailable ? "Online " : "Offline "
+            - var status = this.isAvailable ? "Online " : "Offline "
+            //- var status = "true"
             button.btn.btn-info.dropdown-toggle(type="button",data-toggle="dropdown", data-offline-text="Availability - Offline", data-online-text="Availability - Online") Availability - #{status}
               span.caret
             ul.dropdown-menu

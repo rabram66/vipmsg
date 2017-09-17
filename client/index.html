@@ -21,6 +21,12 @@
         $scope.getAvailability = function(coach) {
           return coach.isAvailable ? 'Available' : 'Unavailable';
         }
+        
+        $scope.formatNumber = function(number) {
+          return `(${number.substring(2,5)}) ${number.substring(5, 8)} ${number.substring(8)}`;
+          //+17185147780
+          //(718) 555-1212
+        }
         fetch('/coaches')
           .then( function (response) {
             console.log("res:",response.ok);
@@ -65,7 +71,7 @@
      <p>{{coach.about}}</p>
     </div>
     <div class="col">
-       <br> <div ng-src="{{coach.headline}}" class="btn btn-success"><br>{{coach.callLine}}</div>
+       <br> <div ng-src="{{coach.headline}}" ng-class="{'btn': true, 'btn-success': coach.isAvailable, 'btn-danger': !coach.isAvailable}">{{getAvailability(coach)}}<br>{{formatNumber(coach.callLine)}}</div>
         </div>
     
   </div>

@@ -8,7 +8,6 @@ block content
           button.close(type="button",data-dismiss="alert",aria-label="Close")
             |&times;
           |#{error}
- 
         
     .row
       h2 List of Coaches/Phone Lines
@@ -47,6 +46,7 @@ block content
                       input(type="hidden", name="password" value="{coach.password}")
                       td 
                         a.btn.btn-success(href="#editCoachModal", data-toggle="modal", data-id=""+coach._id) Edit Details
+                        a.btn.btn-success(href="coach/"+coach._id,) View Coach
                         a.btn.btn-danger(href="#deleteCoachModal", data-toggle="modal", data-id=""+coach._id) Delete Coach
                 else
                   tr

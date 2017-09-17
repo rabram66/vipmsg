@@ -5,7 +5,6 @@ var router  = require('express').Router(),
     LocalStrategy = require('passport-local').Strategy,
     mongoose = require("mongoose");
 var _    = require('lodash');
-//var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds161873.mlab.com:61873/heroku_pb8gktr9";
 var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65";
 
 //require models
@@ -185,8 +184,20 @@ module.exports = function (io ) {
     
     router.get('/coach/home', function(req, res, next) {
         var data = {};
-        
         Coach.findById(req.user.id).exec().then((coach) => {
+            data.coach = coach;
+            return res.render("coach-dashboard", data);
+        })
+        .catch((err) => {
+            console.log("Coach dashboard Error",err);
+            return res.render("coach-dashboard");
+        })
+        
+    });
+    
+    router.get('/coach/:coachId', function(req, res, next) {
+        var data = {};
+        Coach.findById(req.params.coachId).exec().then((coach) => {
             data.coach = coach;
             return res.render("coach-dashboard", data);
         })

@@ -49,7 +49,7 @@ var dashboard = require("./dashboard")(io);
 app.use('/admin', dashboard);
 
 app.get('/coaches', function(req, res) {
-    Coach.find({}, 'name callLine isAvailable category img_URL about headline').exec()
+    Coach.find({}, 'name callLine isAvailable category img_URL about headline callRatePerMin').exec()
         .then( coaches => {
             return res.json(coaches);
         })

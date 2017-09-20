@@ -5,7 +5,8 @@ var router  = require('express').Router(),
     LocalStrategy = require('passport-local').Strategy,
     mongoose = require("mongoose");
 var _    = require('lodash');
-var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65";
+//var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds161873.mlab.com:61873/heroku_pb8gktr9";
+//var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds149511.mlab.com:49511/heroku_2fxn0t65";
 
 //require models
 var User    = require('./models/user');
@@ -131,18 +132,19 @@ module.exports = function (io ) {
     })
     
     router.post('/edit/coach', function(req, res, next) {
-        var id = req.body.id;
+        var id = (Array.isArray(req.body.id)) ? req.body.id[1] : req.body.id;
         var redirectUrl = req.user.callLine ? '/admin/coach/home' : '/admin/dashboard';
         Coach.findById(id)
         .then((coach) => {
             coach.name = req.body.name,
             coach.callLine = req.body.callLine;
             coach.callRatePerMin = req.body.callRatePerMin;
-            coach.textResponse = req.body.textResponse;
+            coach.textResponse = (req.body.textResponse) ? req.body.textResponse : coach.textResponse;
             coach.messageLine = req.body.messageLine;
-            coach.dequeueLine = req.body.dequeueLine;
-            coach.username = req.body.username;
-            coach.img_URL = req.body.img_URL;
+            coach.dequeueLine = (req.body.dequeueLine) ? req.body.dequeueLine : coach.dequeueLine;
+            coach.username = (req.body.username) ? req.body.username : coach.username;
+            coach.img_URL = (req.body.img_URL) ? req.body.img_URL : coach.img_URL;
+            coach.about = req.body.about
             if(req.body.password2) coach.password = req.body.password2;
             return coach.save();
         })
@@ -184,20 +186,8 @@ module.exports = function (io ) {
     
     router.get('/coach/home', function(req, res, next) {
         var data = {};
-        Coach.findById(req.user.id).exec().then((coach) => {
-            data.coach = coach;
-            return res.render("coach-dashboard", data);
-        })
-        .catch((err) => {
-            console.log("Coach dashboard Error",err);
-            return res.render("coach-dashboard");
-        })
         
-    });
-    
-    router.get('/coach/:coachId', function(req, res, next) {
-        var data = {};
-        Coach.findById(req.params.coachId).exec().then((coach) => {
+        Coach.findById(req.user.id).exec().then((coach) => {
             data.coach = coach;
             return res.render("coach-dashboard", data);
         })

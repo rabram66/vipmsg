@@ -80,11 +80,6 @@ ul {
 
 /* Tables
 ---------------------------------- */
-
-.fill {
-min-height:100%;
-}
-
 .table:not(.table-bordered) {
   border-bottom: 2px solid #f3f3f3;
 }
@@ -206,7 +201,7 @@ tbody {
 .header {
   border-top: 1px solid #ffffff;
   border-bottom: 2px solid #f1f1f1;
-  background-color: #ddd666;
+  background-color: #fcfcfc;
 }
 
 .header.dark {
@@ -216,7 +211,7 @@ tbody {
 }
 
 .header-top.dark + .header:not(.dark) {
-  border-top-color: #ffffff;
+  border-top-color: #dddddd;
 }
 
 .header-top:not(.dark) + .header.dark {
@@ -247,7 +242,7 @@ tbody {
   position: absolute;
   width: 100%;
   left: 0;
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid rgba(0, 0, 0, 0.07);
   border-top-color: #a0a0a0;
 }
@@ -8266,8 +8261,7 @@ h6.media-heading {
 }
 
 .slideshow .dark-translucent-bg {
-  background-color: rgba(0, 0, 0, 0.0);
-    
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .slideshow .light-translucent-bg {

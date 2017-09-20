@@ -138,7 +138,7 @@ module.exports = function (io ) {
         .then((coach) => {
             coach.name = req.body.name,
             coach.callLine = req.body.callLine;
-            coach.callRatePerMin = req.body.callRatePerMin;
+            coach.callRatePerMin = (req.body.callRatePerMin) ? req.body.textResponse : coach.callRatePerMin;
             coach.textResponse = (req.body.textResponse) ? req.body.textResponse : coach.textResponse;
             coach.messageLine = req.body.messageLine;
             coach.dequeueLine = (req.body.dequeueLine) ? req.body.dequeueLine : coach.dequeueLine;
@@ -188,6 +188,20 @@ module.exports = function (io ) {
         var data = {};
         
         Coach.findById(req.user.id).exec().then((coach) => {
+            data.coach = coach;
+            return res.render("coach-dashboard", data);
+        })
+        .catch((err) => {
+            console.log("Coach dashboard Error",err);
+            return res.render("coach-dashboard");
+        })
+        
+    });
+    
+    router.get('/coach/home/:coach_id', function(req, res, next) {
+        var data = {};
+        
+        Coach.findById(req.params.coach_id).exec().then((coach) => {
             data.coach = coach;
             return res.render("coach-dashboard", data);
         })

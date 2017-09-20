@@ -14,7 +14,7 @@ block content
 
     .row
       .panel.panel-default
-        .panel-heading My Details
+        .panel-heading 
           .btn-group
             - var status = coach.isAvailable ? "Online " : "Offline "
             button.btn.btn-info.dropdown-toggle(type="button",data-toggle="dropdown", data-offline-text="Availability - Offline", data-online-text="Availability - Online") Availability - #{status}
@@ -42,18 +42,18 @@ block content
                     .form-group
                         label Call Line:
                         input.form-control(type="text" value=coach.callLine, name="callLine", required,placeholder="Phone line users call to join queue")
-                    .form-group
-                        label Call Rate Per Minute:
-                        input.form-control(type="number",step="0.01",value=coach.callRatePerMin, disabled="disabled",min=0, name="callRatePerMin", required,placeholder="Amount to charge user per minute for call duration")
-                    .form-group
-                       label Text Response:
-                       textarea.form-control(type="text" value=coach.textResponse, name="textResponse", required, disabled="disabled", placeholder="Response given to user after successful initial charge on card")
+                    //.form-group
+                    //    label Call Rate Per Minute:
+                    //    input.form-control(type="number",step="0.01",value=coach.callRatePerMin, disabled="disabled",min=0, name="callRatePerMin", required,placeholder="Amount to charge user per minute for call duration")
+                    //.form-group
+                    //   label Text Response:
+                    //   textarea.form-control(type="text" value=coach.textResponse, name="textResponse", required, disabled="disabled", placeholder="Response given to user after successful initial charge on card.")
                     .form-group
                         label Cell Phone:
                         input.form-control(type="text" value=coach.messageLine, name="messageLine", placeholder="Coach phone line text messages are sent to when new users join queue")
-                    // .form-group
-                    //     label Dequeue Line:
-                    //     input.form-control(type="text" value="", name="dequeueLine", placeholder="Phone line coach must use to call in order to attend to users")
+                    .form-group
+                        label Dequeue Line:
+                        input.form-control(type="text" value=coach.dequeueLine, name="dequeueLine", placeholder="Phone line coach must use to call in order to attend to users")
                     .form-group
                         label About:
                         input.form-control(type="text" value=coach.about, name="about", placeholder="What the caller sees about you on the app")
@@ -81,7 +81,7 @@ block content
                     td(name="messageLine") #{coach.messageLine}
                     td(name="about") #{coach.about}
                     td 
-                      a.btn.btn-success(href="#editCoachModal", data-toggle="modal", data-id=""+coach._id) Edit Details
+                      //a.btn.btn-success(href="#editCoachModal", data-toggle="modal", data-id=""+coach._id) Edit Details
                 else
                   tr
                     td No Data

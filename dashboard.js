@@ -72,10 +72,10 @@ passport.deserializeUser(function(key, done) {
 router.use(passport.initialize());
 router.use(passport.session());
 
-module.exports = function (io ) {
+module.exports = function (io) {
     router.get('/login', function(req, res){
         res.render('login', {login: true});
-    })
+    });
 
     router.post('/login', passport.authenticate('admin-local', { 
         successRedirect: '/admin/dashboard',
@@ -84,7 +84,7 @@ module.exports = function (io ) {
     
     router.get('/coach/login', function(req, res){
         res.render('login2', {login: true});
-    })
+    });
     
     router.post('/coach/login', passport.authenticate('coach-local', { 
         successRedirect: '/admin/coach/home',
@@ -138,7 +138,7 @@ module.exports = function (io ) {
         .then((coach) => {
             coach.name = req.body.name,
             coach.callLine = req.body.callLine;
-            coach.callRatePerMin = (req.body.callRatePerMin) ? req.body.textResponse : coach.callRatePerMin;
+            coach.callRatePerMin = (req.body.callRatePerMin) ? req.body.callRatePerMin : coach.callRatePerMin;
             coach.textResponse = (req.body.textResponse) ? req.body.textResponse : coach.textResponse;
             coach.messageLine = req.body.messageLine;
             coach.dequeueLine = (req.body.dequeueLine) ? req.body.dequeueLine : coach.dequeueLine;

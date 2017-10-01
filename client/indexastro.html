@@ -161,7 +161,7 @@
 										<div class="col-md-3 col-sm-6 masonry-grid-item" ng-repeat="coach in coaches|filter:'astro'">
 											<div class="listing-item white-bg bordered mb-20">
 												<div class="overlay-container">
-													<img style="height: 340px" ng-src="{{coach.img_URL}}" alt="">
+													<img style="height: 300px" ng-src="{{coach.img_URL}}" alt="">
 													<!--<a class="overlay-link popup-img-single" href="images/product-1.jpg"><i class="fa fa-search-plus"></i></a>-->
 												<!-- Put a highlighted message here	<span class="badge">30% OFF</span> -->
 													<div class="overlay-to-top links">
@@ -177,7 +177,7 @@
 													<p style="height: 80px; text-overflow: ellipsis;" class="small">{{coach.about}}</p>
 													<div class="elements-list clearfix">
 														<span class="price">{{coach.callRatePerMin}} per minute</span>
-														<div ng-src="{{coach.headline}}" ng-class="{'btn': true, 'btn-success': coach.isAvailable, 'btn-danger': !coach.isAvailable}">{{getAvailability(coach)}}<br>{{formatNumber(coach.callLine)}}</div>
+														<div ng-src="{{coach.headline}}" ng-class="{'btn': true, 'btn-success': coach.isAvailable, 'btn-danger': !coach.isAvailable}"><a style="color:white" href="tel:{{formatNumber(coach.callLine)}}">{{getAvailability(coach)}}<br>{{formatNumber(coach.callLine)}}</a></div>
 													</div>
 												</div>
 											</div>

@@ -461,8 +461,11 @@
 													<p style="height: 80px; text-overflow: ellipsis;" class="small">{{coach.about}}</p>
 													<div class="elements-list clearfix">
 														<span class="price">{{coach.callRatePerMin}} per minute</span>
-														<div ng-src="{{coach.headline}}" ng-class="{'btn': true, 'btn-success': coach.isAvailable, 'btn-danger': !coach.isAvailable}">{{getAvailability(coach)}}<br>{{formatNumber(coach.callLine)}}</div>
-														
+														<a href="tel:{{coach.callLine}}">
+															<div ng-src="{{coach.headline}}" ng-class="{'btn': true, 'btn-success': coach.isAvailable, 'btn-danger': !coach.isAvailable}">{{getAvailability(coach)}}
+																<br>{{formatNumber(coach.callLine)}}
+															</div>
+														</a>
 													</div>
 												</div>
 											</div>

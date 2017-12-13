@@ -1,0 +1,222 @@
+extends layout
+
+block content
+  div#page-wrapper
+    if error
+      .row
+        div.alert.alert-success.alert-dismissible(role="alert")
+          button.close(type="button",data-dismiss="alert",aria-label="Close")
+            |&times;
+          |#{error}
+        
+    .row
+      h2 List of Coaches/Phone Lines
+    
+    .row
+      .panel.panel-default
+        .panel-heading Coaches/Phone Lines
+        .panel-body
+          .table-responsive
+            table.table
+              thead
+                tr
+                  th #
+                  th Incoming Call Line
+                  th Call Rate Per Min
+                  th Text Response
+                  th Coach Message line
+                  th Coach Dequeue Line
+                  th Coach Name
+                  th Coach Username
+                  th Action
+              tbody
+                if coaches
+                  for coach, i in coaches
+                    -var no = 1 + i
+                      
+                    tr
+                      td=no
+                      td(name="callLine") #{coach.callLine}
+                      td(name="callRatePerMin") #{coach.callRatePerMin}$
+                      td(name="response") #{coach.textResponse}
+                      td(name="messageLine") #{coach.messageLine}
+                      td(name="dequeueLine") #{coach.dequeueLine}
+                      td(name="name") #{coach.name}
+                      td(name="username") #{coach.username}
+                      input(type="hidden", name="password" value="{coach.password}")
+                      td 
+                        a.btn.btn-success(href="#editCoachModal", data-toggle="modal", data-id=""+coach._id) Edit Details
+                        a.btn.btn-danger(href="#deleteCoachModal", data-toggle="modal", data-id=""+coach._id) Delete Coach
+                else
+                  tr
+                    td No Coaches
+    
+    .row
+      h2 List of Admin Users
+    
+    .row
+      .panel.panel-default
+        .panel-heading Admin Users
+        .panel-body
+          .table-responsive
+            table.table
+              thead
+                tr
+                  th #
+                  th Username
+                  th Email
+                  th First Name
+                  th Last Name
+                  th Action
+              tbody
+                if users
+                  for user, i in users
+                    -var no = 1 + i
+                      
+                    tr
+                      td=no
+                      td #{user.username}
+                      td #{user.email}
+                      td #{user.firstname}
+                      td #{user.lastname}
+                      td 
+                        a(href="#editUserModal", data-toggle="modal") Edit Details
+                else
+                  tr
+                    td No User
+
+
+block addUserModalBox
+  <!-- Add Admin User Modal -->
+  div#addUserModal.modal.fade(role="dialog")
+    .modal-dialog.modal-lg
+      .modal-content
+        form#simpleForm(action="/admin/new/user", method="post")
+          .modal-header
+            button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
+            h4#myModalLabel.modal-title
+              |Add Admin User
+          .modal-body
+            .row
+              div(style="padding:20px")
+                .form-group
+                    label Username:
+                    input.form-control(type="text" value="", name="username", required)
+                .form-group
+                    label Password:
+                    input.form-control(type="password" value="", name="password", required)
+                .form-group
+                    label Email:
+                    input.form-control(type="email" value="", name="email")
+                .form-group
+                    label First Name:
+                    input.form-control(type="text" value="", name="firstname")
+                .form-group
+                    label Last Name:
+                    input.form-control(type="text" value="", name="lastname")
+          .modal-footer
+            button.btn.btn-success(type="submit") Save
+            button.btn.btn-default(type="button",data-dismiss="modal") close
+            
+block addCoachModalBox
+  <!-- Add Coach Modal -->
+  div#addCoachModal.modal.fade(role="dialog")
+    .modal-dialog.modal-lg
+      .modal-content
+        form#simpleForm(action="/admin/new/coach", method="post")
+          .modal-header
+            button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
+            h4#myModalLabel.modal-title
+              |Add Coach/Phone-Line
+          .modal-body
+            .row
+              div(style="padding:20px")
+                .form-group
+                    label Name:
+                    input.form-control(type="text" value="", name="name", required,placeholder="Coach name")
+                .form-group
+                    label Call Line:
+                    input.form-control(type="text" value="", name="callLine", required,placeholder="Phone line users call to join queue")
+                .form-group
+                    label Call Rate Per Minute:
+                    input.form-control(type="number",step="0.01",value="",min=0, name="callRatePerMin", required,placeholder="Amount to charge user per minute for call duration")
+                .form-group
+                    label Text Response:
+                    textarea.form-control(type="text" value="", name="textResponse", required, placeholder="Response given to user after successful initial charge on card")
+                .form-group
+                    label Message Line:
+                    input.form-control(type="text" value="", name="messageLine", placeholder="Coach phone line text messages are sent to when new users join queue")
+                .form-group
+                    label Dequeue Line:
+                    input.form-control(type="text" value="", name="dequeueLine", placeholder="Phone line coach must use to call in order to attend to users")
+                .form-group
+                    label Username:
+                    input.form-control(type="text" value="", name="username", placeholder="Coach login username")
+                .form-group
+                    label Password:
+                    input.form-control(type="password" value="", name="password", placeholder="Coach login password")
+          .modal-footer
+            button.btn.btn-success(type="submit") Save
+            button.btn.btn-default(type="button",data-dismiss="modal") close
+            
+            
+block editCoachModalBox
+  <!-- Edit Coach Modal -->
+  div#editCoachModal.modal.fade(role="dialog")
+    .modal-dialog.modal-lg
+      .modal-content
+        form#simpleForm(action="/admin/edit/coach", method="post")
+          .modal-header
+            button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
+            h4#myModalLabel.modal-title
+              |Edit Coach/Phone-Line
+          .modal-body
+            .row
+              div(style="padding:20px")
+                input(type="hidden",required, name="id")
+                .form-group
+                    label Name:
+                    input.form-control(type="text" value="", name="name", required,placeholder="Coach name")
+                .form-group
+                    label Call Line:
+                    input.form-control(type="text" value="", name="callLine", required,placeholder="Phone line users call to join queue")
+                .form-group
+                    label Call Rate Per Minute:
+                    input.form-control(type="number",step="0.01",value="",min=0, name="callRatePerMin", required,placeholder="Amount to charge user per minute for call duration")
+                .form-group
+                    label Text Response:
+                    textarea.form-control(type="text" value="", name="textResponse", required, placeholder="Response given to user after successful initial charge on card")
+                .form-group
+                    label Message Line:
+                    input.form-control(type="text" value="", name="messageLine", placeholder="Coach phone line text messages are sent to when new users join queue")
+                .form-group
+                    label Dequeue Line:
+                    input.form-control(type="text" value="", name="dequeueLine", placeholder="Phone line coach must use to call in order to attend to users")
+                .form-group
+                    label Username:
+                    input.form-control(type="text" value="", name="username", placeholder="Coach login username")
+                .form-group
+                    label Password:
+                    input.form-control(type="password" value="", style="display:none")
+                    input.form-control(type="password" value="", name="password2", placeholder="Coach login password")
+          .modal-footer
+            button.btn.btn-success(type="submit") Save
+            button.btn.btn-default(type="button",data-dismiss="modal") close
+            
+            
+block deleteCoachModalBox
+  <!-- Delete Coach Modal -->
+  div#deleteCoachModal.modal.fade(role="dialog")
+    .modal-dialog.modal-lg
+      .modal-content
+        form#simpleForm(action="/admin/delete/coach", method="post")
+          .modal-header
+            button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
+            h4#myModalLabel.modal-title
+              |Delete Coach/Phone-Line
+          .modal-body
+            input(type="hidden",required, name="id")
+            p Are you sure?
+          .modal-footer
+            button.btn.btn-danger(type="submit") Delete
+            button.btn.btn-default(type="button",data-dismiss="modal") close

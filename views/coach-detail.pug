@@ -1,0 +1,32 @@
+.row
+  div(style="padding:20px")
+    input(type="hidden",required, name="id",value=coach._id)
+    .form-group
+        label Name:
+        input.form-control(type="text" value=coach.name, name="name", required,placeholder="Coach name")
+    .form-group
+        label Call Line:
+        input.form-control(type="text" value=coach.callLine, name="callLine", required,placeholder="Phone line users call to join queue")
+    .form-group
+        label Call Rate Per Minute:
+        input.form-control(type="number",step="0.01",value=coach.callRatePerMin,min=0, name="callRatePerMin", required,placeholder="Amount to charge user per minute for call duration")
+    .form-group
+        label Text Response:
+        // textarea.form-control(type="text" value=coach.textResponse, name="textResponse", required, placeholder="Response given to user after successful initial charge on card")
+        input.form-control(type="text" value=coach.textResponse, name="textResponse", required, placeholder="Response given to user after successful initial charge on card")
+    .form-group
+        label Message Line:
+        input.form-control(type="text" value=coach.messageLine, name="messageLine", placeholder="Coach phone line text messages are sent to when new users join queue")
+    .form-group
+        label Dequeue Line:
+        input.form-control(type="text" value=coach.dequeueLine, name="dequeueLine", placeholder="Phone line coach must use to call in order to attend to users")
+    .form-group
+        label About:
+        input.form-control(type="text" value=coach.about, name="about", placeholder="What the end user sees on the website as a description")
+    .form-group
+        label Username:
+        input.form-control(type="text" value=coach.username, name="username", placeholder="Coach login username")
+    .form-group
+        label Password:
+        input.form-control(type="password" value="", style="display:none")
+        input.form-control(type="password" value="", name="password2", placeholder="Coach login password")

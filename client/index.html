@@ -2,7 +2,7 @@
 <!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
 <!--[if gt IE 9]> <html lang="en" class="ie"> <![endif]-->
 <!--[if !IE]><!-->
-<html dir="ltr" lang="en" ng-app="">
+<html dir="ltr" lang="en" ng-app="vipMsg">
 	<!--<![endif]-->
 
 	<head>
@@ -56,48 +56,12 @@
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/angular.min.js"></script>
+    <script src="/js/vipmsg.js"></script>
 
 		<!-- Custom css --> 
 		<link href="css/custom.css" rel="stylesheet">
 			<!-- Custom css --> 
 		<link href="css/custom.css" rel="stylesheet">
-<script>
-      function ChatController($scope) {
-        var socket = io.connect();
-
-        $scope.coaches = [];
-        $scope.getAvailability = function(coach) {
-          return coach.isAvailable ? 'Available' : 'Unavailable';
-        }
-        
-        $scope.formatNumber = function(number) {
-          return `(${number.substring(2,5)}) ${number.substring(5, 8)} ${number.substring(8)}`;
-          //+17185147780
-          //(718) 555-1212
-        }
-        fetch('/coaches')
-          .then( function (response) {
-            console.log("res:",response.ok);
-            return response.json();
-          })
-          .then( function (coaches) {
-            $scope.coaches = coaches;
-            $scope.$apply();
-          })
-          .catch( function (err) {
-            console.log(err);
-          });
-
-        socket.on('availability_change', function (change) {
-          console.log(change);
-          var coach = $scope.coaches.find(function(coach){
-            return coach._id === change.id; 
-          });
-          coach.isAvailable = change.availability;
-          $scope.$apply();
-        });
-      }
-    </script>
 	</head>
 
 	<!-- body classes:  -->
@@ -107,6 +71,7 @@
 	<!-- "gradient-background-header": applies gradient background to header -->
 	<!-- "page-loader-1 ... page-loader-6": add a page loader to the page (more info @components-page-loaders.html) -->
 	<body class="no-trans  transparent-header  ">
+		<div id="vipMsg" ng-controller="ChatController">
 
 		<!-- scrollToTop -->
 		<!-- ================ -->
@@ -1311,6 +1276,7 @@
 		<!-- Custom Scripts -->
 		<script type="text/javascript" src="js/custom.js"></script>
 
+		</div>
 
 	</body>
 </html>

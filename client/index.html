@@ -52,12 +52,11 @@
 		<link href="css/typography-default.css" rel="stylesheet" >
 		<!-- Color Scheme (In order to change the color scheme, replace the blue.css with the color scheme that you prefer)-->
 		<link href="css/skins/light_blue.css" rel="stylesheet">
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
-    <script src="/js/jquery.min.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="/js/angular.min.js"></script>
-    <script src="/js/vipmsg.js"></script>
-
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+	    <script type="text/javascript" src="/js/jquery.min.js"></script>
+	    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+	    <script type="text/javascript" src="/js/angular.min.js"></script>
+	    <script type="text/javascript" src="/js/vipmsg.js"></script>
 		<!-- Custom css --> 
 		<link href="css/custom.css" rel="stylesheet">
 			<!-- Custom css --> 
@@ -75,7 +74,7 @@
 
 		<!-- scrollToTop -->
 		<!-- ================ -->
-		<div class="scrollToTop circle"><i class="icon-up-open-big"></i></div>
+		<div class="scrollToTop circle"><!-- <i class="icon-up-open-big"></i> --></div>
 		
 		<!-- page wrapper start -->
 		<!-- ================ -->
@@ -426,7 +425,7 @@
 													<p style="height: 80px; text-overflow: ellipsis;" class="small">{{coach.about}}</p>
 													<div class="elements-list clearfix">
 														<span class="price">{{coach.callRatePerMin}} per minute</span>
-														<a href="tel:{{coach.callLine}}">
+														<a href="{{activateNumber(coach.callLine)}}">
 															<div ng-src="{{coach.headline}}" ng-class="{'btn': true, 'btn-success': coach.isAvailable, 'btn-danger': !coach.isAvailable}">{{getAvailability(coach)}}
 																<br>{{formatNumber(coach.callLine)}}
 															</div>
@@ -1276,7 +1275,6 @@
 		<!-- Custom Scripts -->
 		<script type="text/javascript" src="js/custom.js"></script>
 
-		</div>
-
+	</div>
 	</body>
 </html>

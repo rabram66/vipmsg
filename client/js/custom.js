@@ -1,31 +1,36 @@
-
-
 $('#editCoachModal').on('show.bs.modal', function (event) {
-    
-    var button      = $(event.relatedTarget) // Button that triggered the modal
-    var coachId     = button.data('id') // Extract info from data-* attributes
-    var coachRow    = button.closest('tr');
-    
-    var name            = coachRow.find("td[name='name']").text();
-    var callLine        = coachRow.find("td[name='callLine']").text();
-    var callRatePerMin  = coachRow.find("td[name='callRatePerMin']").text();
-    var response        = coachRow.find("td[name='response']").text();
-    var msgLine         = coachRow.find("td[name='messageLine']").text();
-    var deqLine         = coachRow.find("td[name='dequeueLine']").text();
-    var username        = coachRow.find("td[name='username']").text();
-    var password        = coachRow.find("input[name='password']").text();
-    
-    callRatePerMin = callRatePerMin.replace("$", "");
-    var modal   = $(this);
-    modal.find("input[name='id']").val(coachId)
-    modal.find("input[name='name']").val(name);
-    modal.find("input[name='callLine']").val(callLine);
-    modal.find("input[name='callRatePerMin']").val(callRatePerMin);
-    modal.find("textarea[name='textResponse']").val(response);
-    modal.find("input[name='messageLine']").val(msgLine);
-    modal.find("input[name='dequeueLine']").val(deqLine);
-    modal.find("input[name='username']").val(username);
+    var button      = $(event.relatedTarget); // Button that triggered the modal
+    var coachId     = button.data('id'); // Extract info from data-* attributes
+    $('#simpleCoachForm .modal-body').load('coach/detail/'+coachId, function (event) {
+    });
 })
+
+// $('#editCoachModal').on('show.bs.modal', function (event) {
+    
+//     var button      = $(event.relatedTarget) // Button that triggered the modal
+//     var coachId     = button.data('id') // Extract info from data-* attributes
+//     var coachRow    = button.closest('tr');
+    
+//     var name            = coachRow.find("td[name='name']").text();
+//     var callLine        = coachRow.find("td[name='callLine']").text();
+//     var callRatePerMin  = coachRow.find("td[name='callRatePerMin']").text();
+//     var response        = coachRow.find("td[name='response']").text();
+//     var msgLine         = coachRow.find("td[name='messageLine']").text();
+//     var deqLine         = coachRow.find("td[name='dequeueLine']").text();
+//     var username        = coachRow.find("td[name='username']").text();
+//     var password        = coachRow.find("input[name='password']").text();
+    
+//     callRatePerMin = callRatePerMin.replace("$", "");
+//     var modal   = $(this);
+//     modal.find("input[name='id']").val(coachId)
+//     modal.find("input[name='name']").val(name);
+//     modal.find("input[name='callLine']").val(callLine);
+//     modal.find("input[name='callRatePerMin']").val(callRatePerMin);
+//     modal.find("textarea[name='textResponse']").val(response);
+//     modal.find("input[name='messageLine']").val(msgLine);
+//     modal.find("input[name='dequeueLine']").val(deqLine);
+//     modal.find("input[name='username']").val(username);
+// })
 
 $('#deleteCoachModal').on('show.bs.modal', function (event) {
     
@@ -65,6 +70,32 @@ $('div.btn-group ul.dropdown-menu li a').click(function (e) {
             alert("Unable to change availability");
         })
     return false;
+});
+
+$('#togBtn').click(function (e) {
+    // e.preventDefault();
+    console.log('toggle before:'+$(this).attr("checked"));
+    var body = {};
+    if ($(this).attr("checked") === "checked"){
+        body.isAvailable = false;
+        $(this).removeAttr("checked");
+    } else {
+        body.isAvailable = true;
+        $(this).attr("checked","checked");
+    }
+    console.log('toggle after:'+$(this).attr("checked"));
+    body = JSON.stringify(body);
+    fetch('/admin/coach/change_availability', {method: "POST",  credentials: 'include', body: body, headers: {'Content-Type': 'application/json'} })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(status) {
+            // alert("Availability successfully changed");
+        })
+        .catch(function(err) {
+            alert("Unable to change availability");
+        })
+    return true;
 });
 
 // $(".phone").text(function(i, text) {

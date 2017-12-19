@@ -212,6 +212,21 @@ module.exports = function (io) {
         
     });
     
+    router.get('/coach/detail/:coach_id', function(req, res, next) {
+        var data = {};
+        
+        Coach.findById(req.params.coach_id).exec().then((coach) => {
+            data.coach = coach;
+            // res.json(data);
+            return res.render("coach-detail", data);
+        })
+        .catch((err) => {
+            console.log("Coach detail data Error",err);
+            res.end();
+        })
+        
+    });
+    
     router.post('/coach/change_availability', function(req, res, next) {
         console.log(req.body.isAvailable)
         var availability = req.body.isAvailable ? true : false;

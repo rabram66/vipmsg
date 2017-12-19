@@ -158,7 +158,7 @@ block addCoachModalBox
                     input.form-control(type="password" value="", name="password", placeholder="Coach login password")
           .modal-footer
             button.btn.btn-success(type="submit") Save
-            button.btn.btn-default(type="button",data-dismiss="modal") close
+            button.btn.btn-default(type="button",data-dismiss="modal") Close
             
             
 block editCoachModalBox
@@ -166,43 +166,12 @@ block editCoachModalBox
   div#editCoachModal.modal.fade(role="dialog")
     .modal-dialog.modal-lg
       .modal-content
-        form#simpleForm(action="/admin/edit/coach", method="post")
+        form#simpleCoachForm(action="/admin/edit/coach", method="post")
           .modal-header
             button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
             h4#myModalLabel.modal-title
               |Edit Coach/Phone-Line
           .modal-body
-            .row
-              div(style="padding:20px")
-                input(type="hidden",required, name="id")
-                .form-group
-                    label Name:
-                    input.form-control(type="text" value="", name="name", required,placeholder="Coach name")
-                .form-group
-                    label Call Line:
-                    input.form-control(type="text" value="", name="callLine", required,placeholder="Phone line users call to join queue")
-                .form-group
-                    label Call Rate Per Minute:
-                    input.form-control(type="number",step="0.01",value="",min=0, name="callRatePerMin", required,placeholder="Amount to charge user per minute for call duration")
-                .form-group
-                    label Text Response:
-                    textarea.form-control(type="text" value="", name="textResponse", required, placeholder="Response given to user after successful initial charge on card")
-                .form-group
-                    label Message Line:
-                    input.form-control(type="text" value="", name="messageLine", placeholder="Coach phone line text messages are sent to when new users join queue")
-                .form-group
-                    label Dequeue Line:
-                    input.form-control(type="text" value="", name="dequeueLine", placeholder="Phone line coach must use to call in order to attend to users")
-                .form-group
-                    label About:
-                    input.form-control(type="text" value="", name="about", placeholder="What the end user sees on the website as a description")
-                .form-group
-                    label Username:
-                    input.form-control(type="text" value="", name="username", placeholder="Coach login username")
-                .form-group
-                    label Password:
-                    input.form-control(type="password" value="", style="display:none")
-                    input.form-control(type="password" value="", name="password2", placeholder="Coach login password")
           .modal-footer
             button.btn.btn-success(type="submit") Save
             button.btn.btn-default(type="button",data-dismiss="modal") close

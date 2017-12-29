@@ -29,7 +29,7 @@ router.use(flash());
 
 passport.use('admin-local', new LocalStrategy(
   function(username, password, done) {
-    User.findOne({ username: username }, function (err, user) {
+    User.findOne({ username: new RegExp('^'+username+'$', "i") }, function (err, user) {
       if (err) { return done(err); }
       if (!user) {
         return done(null, false);
@@ -42,7 +42,7 @@ passport.use('admin-local', new LocalStrategy(
 passport.use('coach-local', new LocalStrategy(
   function(username, password, done) {
     console.log("Using coach local password");
-    Coach.findOne({ username: username }, function (err, coach) {
+    Coach.findOne({ username: new RegExp('^'+username+'$', "i") }, function (err, coach) {
       if (err) { return done(err); }
       if (!coach) {
         return done(null, false);

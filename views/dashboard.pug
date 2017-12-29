@@ -102,7 +102,7 @@ block addUserModalBox
               div(style="padding:20px")
                 .form-group
                     label Username:
-                    input.form-control(type="text" value="", name="username", required)
+                    input.form-control(type="text" value="", name="username",style='text-transform: lowercase;', required)
                 .form-group
                     label Password:
                     input.form-control(type="password" value="", name="password", required)
@@ -152,7 +152,7 @@ block addCoachModalBox
                     input.form-control(type="text" value="", name="dequeueLine", placeholder="Phone line coach must use to call in order to attend to users")
                 .form-group
                     label Username:
-                    input.form-control(type="text" value="", name="username", placeholder="Coach login username")
+                    input.form-control(type="text" value="", name="username", placeholder="Coach login username",style='text-transform: lowercase;')
                 .form-group
                     label Password:
                     input.form-control(type="password" value="", name="password", placeholder="Coach login password")

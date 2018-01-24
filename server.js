@@ -3,7 +3,7 @@ var path = require('path');
 var _    = require('lodash');
 
 var accountSid = 'AC6001bf5017425188638dab046f7cd77c';
-var authToken = "7a33bc48906e82662ab1d66ebcb20b91"; 
+var authToken = "7a33bc48906e82662ab1d66ebcb20b91";
 
 //mongodb and mongoose config
 //var mLabUrl = "mongodb://vipmsg:MatthewIs11@ds161873.mlab.com:61873/heroku_pb8gktr9";
@@ -74,7 +74,7 @@ app.all('/agent', function(req, res) {
     console.log("Attending to user");
     console.log(req.query);
     agentDequeue(req.query.Caller).then((dequeueName) => {
-        
+
         twiml.dial({}, function() {
             this.queue(dequeueName, {
                 url: '/leaving-queue',
@@ -82,11 +82,11 @@ app.all('/agent', function(req, res) {
             });
         })
         .redirect();
-        
+
         res.writeHead(200, {
             'Content-Type': 'text/xml'
         });
-        return res.end(twiml.toString());    
+        return res.end(twiml.toString());
     }).catch((error) => {
         twiml.say(error.message);
         twiml.say("Unable to join queue");
@@ -94,10 +94,10 @@ app.all('/agent', function(req, res) {
         res.writeHead(200, {
             'Content-Type': 'text/xml'
         });
-        res.end(twiml.toString());    
+        res.end(twiml.toString());
     });
 
-    
+
 });
 
 app.all('/start-call', function(req, res) {
@@ -115,23 +115,23 @@ app.all('/start-call', function(req, res) {
                 action: "/set-card-number",
                 method: "GET",
                 timeout: 30,
-            });    
+            });
         }
-        
+
         console.log(twiml.toString());
         res.writeHead(200, {
             'Content-Type': 'text/xml'
         });
-        res.end(twiml.toString());    
+        res.end(twiml.toString());
     }).catch((error) => {
         twiml.say("Please enter your debit or credit card number followed by the pound sign.");
         console.log(twiml.toString());
         res.writeHead(200, {
             'Content-Type': 'text/xml'
         });
-        res.end(twiml.toString());    
+        res.end(twiml.toString());
     });
-    
+
 });
 
 app.all('/set-card-number', function(req, res) { //capture card
@@ -141,7 +141,7 @@ app.all('/set-card-number', function(req, res) { //capture card
     var callSid = req.query.CallSid;
     var called  = req.query.Called;
     var cc = req.query.Digits;
-   
+
     twiml.say("You entered");
     twiml.say(digitize(cc));
     twiml.say("Thanks");
@@ -250,11 +250,11 @@ app.all('/set-cvv', function(req, res) {
 
             console.log(results);
 
-            //change amount to 10,000 
+            //change amount to 10,000
             //change capture to false (changing to false, holds it, and it can be held up to 7 days)
             //if the the transcation goes through you should receive a charge object
             //make a statement such as:
-            //if (charge) go through with payment process and make variable called total price and say if total price > 100 then refund total price - 100 and then set the stripe.charges.id.capture: true. if error, return.  
+            //if (charge) go through with payment process and make variable called total price and say if total price > 100 then refund total price - 100 and then set the stripe.charges.id.capture: true. if error, return.
             stripe.charges.create({
                amount: 1000, //increased amount to $10.
                 currency: "usd",
@@ -286,12 +286,12 @@ app.all('/set-cvv', function(req, res) {
                 else {
                     console.log(charge);
                     chargeID=charge.id;
-                    
+
                     twiml.say("Your payment has been processed. Please hold until your party is reached");
                     Coach.findOne({callLine: req.query.Called}).then((coach) => {
-                        
+
                         sendAgentMessage(req, coach);
-                        addToQueue(req, twiml);    
+                        addToQueue(req, twiml);
                         console.log(twiml.toString());
                         res.writeHead(200, {
                             'Content-Type': 'text/xml'
@@ -319,12 +319,12 @@ app.all('/session-ended', function(req, res) {
 
 app.all('/leaving-queue', function(req, res) {
     console.log("Query", req.query);
-    
+
     var twiml = new twilio.TwimlResponse();
     var callSid = req.query.CallSid;
     var timeSpent = req.query.QueueTime;
     console.log("Caller: ", callSid, " spent ", timeSpent, " in the queue, leaving");
-    
+
     MongoClient.connect(mLabUrl, function(err, db) {
         if(err) {
             twiml.say("Issue encountered");
@@ -333,13 +333,13 @@ app.all('/leaving-queue', function(req, res) {
             });
             return res.end(twiml.toString());
         }
-        
+
         var doc = {
             callSid: callSid,
             queueTime: timeSpent
         }
         db.collection('calls').insert(doc);
-        
+
         twiml.say("You are about to be connected.");
         res.writeHead(200, {
             'Content-Type': 'text/xml'
@@ -353,7 +353,7 @@ app.all('/call-ended', function(req, res) {
     console.log("Query:", req.query);
     var callStatus = req.query.CallStatus;
     if (callStatus == "completed") {
-        
+
         console.log("User session call just ended");
         console.log("Total Call duration is:", req.query.CallDuration);
         var duration = req.query.CallDuration;
@@ -361,21 +361,21 @@ app.all('/call-ended', function(req, res) {
         var called   = req.query.Called;
         var minutes;
       if (callStatus =="completed" || "no-answer" || "busy"){
-          stripe.refunds.create({ 
+          stripe.refunds.create({
                         charge: chargeID
-                        }, function(err, refund) { }); 
+                        }, function(err, refund) { });
     }
         MongoClient.connect(mLabUrl, function(err, db) {
             if (err) {
                 console.dir(err);
                 return res.status(200).end();
             }
-            
+
             db.collection('calls').findOne({
-                
+
             }, function(err, call){
                 if(err || call === null) return res.status(200).end("Issue retrieving call details");
-                
+
                 db.collection('cards').findOne({
                     sid: callSid
                 }, function(err, card) {
@@ -383,7 +383,7 @@ app.all('/call-ended', function(req, res) {
                         console.dir(err);
                         return res.status(200).end("Error");
                     }
-                    
+
                     var coachMessageLine;
                     //get coach for called line
                     Coach.findOne({callLine: called})
@@ -396,8 +396,8 @@ app.all('/call-ended', function(req, res) {
                         var promoDiscountTime=300;
                         var sessionDuration = duration - call.queueTime;
                         var amount;
-                        minutes = Math.ceil(sessionDuration / 60);    
-                        
+                        minutes = Math.ceil(sessionDuration / 60);
+
                         if(sessionDuration>=310){
                         amount = Math.ceil((sessionDuration-promoDiscountTime)/ 60) * ratePerMin;
                         return stripe.charges.create({
@@ -411,9 +411,9 @@ app.all('/call-ended', function(req, res) {
                                 'cvc': card.cvv
                             },
                            description: "Call Session Charge, Session Duration: "+sessionDuration+" Duration: "+duration +"Queue Time: "+call.queueTime
-                        
+
                         });  }
-                        
+
                     })
                     .then((charge) => {
                         console.log("Charge: ", charge);
@@ -423,11 +423,11 @@ app.all('/call-ended', function(req, res) {
                             to: coachMessageLine,
                             from: "+16786078044",
                             body: "Your last call lasted " + minutes + " minutes",
-                            //body: "Client has been charged: $" + (amount/99), 
+                            //body: "Client has been charged: $" + (amount/99),
                         }, function(err, message) {
                             console.log(message.sid);
                         });
-                        
+
                         var callerMsg = "How was your call? Click here to tell us https://form.jotform.com/71504518100140";
                         client.messages.create({
                             to: req.query.Caller,
@@ -436,7 +436,17 @@ app.all('/call-ended', function(req, res) {
                         }, function(err, message) {
                             console.log(message.sid);
                         });
-                        
+                        // code to persist call details goes here
+                        var d = new Date();
+                        var call_summary = {
+                            twilio_id : callSid,
+                            caller_phone_no : req.query.Caller,
+                            coachs_phone_no : called,
+                            time_of_call :  d.toUTCString(),
+                            call_duration : duration
+                        }
+                        db.collection('call_summary').insert(call_summary);
+
                         res.status(200).end();
                         return db.collection('cards').findOneAndDelete({
                             sid: callSid
@@ -497,17 +507,17 @@ function addToQueue(request, twiml) {
 }
 
 function agentDequeue(caller) {
-    //phoneNumber is the users phone. 
+    //phoneNumber is the users phone.
     var phoneNumber = caller;
     var dequeueName;
     var defaultDequeue = "onhold-+16782039844";
     return Coach.findOne({dequeueLine: phoneNumber}).then((coach) => {
         if(_.isEmpty(coach)) dequeueName = defaultDequeue;
         else dequeueName = "onhold-"+coach.callLine;
-        
+
         console.log("Agent calling with ", phoneNumber, " is about to join queue:", dequeueName);
         return dequeueName;
     });
-    
+
 
 }

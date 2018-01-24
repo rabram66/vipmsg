@@ -442,7 +442,7 @@ app.all('/call-ended', function(req, res) {
                             twilio_id : callSid,
                             caller_phone_no : req.query.Caller,
                             coachs_phone_no : called,
-                            time_of_call :  d.toUTCString(),
+                            call_end_time :  d.toUTCString(),
                             call_duration : duration
                         }
                         db.collection('call_summary').insert(call_summary);
